@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "VietmapSpeedAlertSDK"
-  spec.version      = "0.0.2"
+  spec.version      = "0.0.3"
   spec.summary      = "Vietmap Speed Alert SDK – GPS tracking and real-time speed alert for iOS."
   spec.description  = <<-DESC
     VietmapSpeedAlertSDK provides GPS tracking and speed alert functionality with a
