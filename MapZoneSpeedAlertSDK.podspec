@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "MapZoneSpeedAlertSDK"
-  spec.version      = "0.0.1"
+  spec.version      = "0.0.6"
   spec.summary      = "MapZone Speed Alert SDK – GPS tracking and real-time speed alert for iOS."
   spec.description  = <<-DESC
     MapZoneSpeedAlertSDK provides GPS tracking and speed alert functionality with a
