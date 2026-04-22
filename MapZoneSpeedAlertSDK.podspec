@@ -8,7 +8,7 @@ Pod::Spec.new do |spec|
     toll booth detection, route progress tracking, and TTS announcements.
   DESC
 
-  spec.homepage     = "https://github.com/vietmap-company/vietmap-speed-alert-sdk"
+  spec.homepage     = "https://github.com/mapzone-global/mapzone_speed_alert_ios"
   spec.license      = { :type => "MIT", :file => "LICENSE" }
   spec.author       = { "Vietmap" => "support@vietmap.vn" }
 
@@ -18,7 +18,7 @@ Pod::Spec.new do |spec|
 
   # Tag format: ios-1.0.0 (separate from Android tags)
   spec.source = {
-    :git => "https://github.com/vietmap-company/vietmap-speed-alert-sdk.git",
+    :git => "https://github.com/mapzone-global/mapzone_speed_alert_ios.git",
     :tag => "ios-#{spec.version}"
   }
 
