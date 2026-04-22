@@ -1,3 +1,3 @@
-pod lib lint VietmapSpeedAlertSDK.podspec
+pod lib lint MapZoneSpeedAlertSDK.podspec
 
-pod trunk push VietmapSpeedAlertSDK.podspec
+pod trunk push MapZoneSpeedAlertSDK.podspec

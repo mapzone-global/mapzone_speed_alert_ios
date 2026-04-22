@@ -1,0 +1,11 @@
+framework module MapZoneSpeedAlertSDK {
+  umbrella header "MapZoneSpeedAlertSDK.h"
+  export *
+
+  module * { export * }
+}
+
+module MapZoneSpeedAlertSDK.Swift {
+  header "MapZoneSpeedAlertSDK-Swift.h"
+  requires objc
+}

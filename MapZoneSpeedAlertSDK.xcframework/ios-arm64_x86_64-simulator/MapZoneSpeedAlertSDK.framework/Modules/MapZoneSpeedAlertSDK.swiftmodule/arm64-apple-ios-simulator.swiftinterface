@@ -1,0 +1,304 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.2 effective-5.10 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)
+// swift-module-flags: -target arm64-apple-ios12.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -module-name MapZoneSpeedAlertSDK
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2
+import AVFoundation
+import BackgroundTasks
+import CoreLocation
+import Foundation
+@_exported import MapZoneSpeedAlertSDK
+import Network
+import Swift
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@objc public class ZoneNetworkManagerV2 : ObjectiveC.NSObject {
+  @objc public var onReady: ((Swift.Int, Swift.Int) -> Swift.Void)?
+  public var onBitmap: ((UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, Foundation.Data?) -> Swift.Void)?
+  public var onVoice: ((Foundation.Data) -> Swift.Void)?
+  @objc public init(baseUrl: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Int)
+  @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double)
+  @objc public func processGps(lat: Swift.Double, lng: Swift.Double, bearing: Swift.Double, speedKmh: Swift.Double, accuracy: Swift.Double)
+  @objc public func reset()
+  @objc deinit
+}
+public struct VMLocation {
+  public let latitude: Swift.Double
+  public let longitude: Swift.Double
+  public let altitude: Swift.Double
+  public let accuracy: Swift.Double
+  public let speed: Swift.Double
+  public let bearing: Swift.Double
+  public let timestamp: Foundation.TimeInterval
+  public init(latitude: Swift.Double, longitude: Swift.Double, altitude: Swift.Double = 0.0, accuracy: Swift.Double = 0.0, speed: Swift.Double = 0.0, bearing: Swift.Double = 0.0, timestamp: Foundation.TimeInterval = Date().timeIntervalSince1970)
+}
+public struct RouteData {
+  public var routeId: Swift.String
+  public static func testDirectSourceLinking() -> Swift.String
+  public var totalDistance: Swift.Double
+  public var estimatedTime: Swift.Double
+  public var waypoints: [MapZoneSpeedAlertSDK.VMLocation]
+  public var speedLimits: [Swift.Double]
+  public init()
+}
+public struct TrackingConfig {
+  public var updateInterval: Foundation.TimeInterval
+  public var minDistanceFilter: Swift.Double
+  public var enableSpeedAlerts: Swift.Bool
+  public var speedThreshold: Swift.Double
+  public var accuracy: Swift.String
+  public var enableBackgroundMode: Swift.Bool
+  public var distanceFilter: Swift.Double
+  public init()
+}
+public struct AlertConfig {
+  public var speedAlertEnabled: Swift.Bool
+  public var voiceAlertsEnabled: Swift.Bool
+  public var alertThreshold: Swift.Double
+  public var speedThreshold: Swift.Double
+  public var language: Swift.String
+  public init()
+}
+@objc public enum VMLocationMode : Swift.Int {
+  case gpsCallback = 0
+  case externalInput = 1
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public enum VMVehicleType : Swift.Int {
+  case car = 1
+  case taxi = 2
+  case bus = 3
+  case coach = 4
+  case truck = 5
+  case trailer = 6
+  case cycle = 7
+  case bike = 8
+  case pedestrian = 9
+  case semiTrailer = 10
+  public var description: Swift.String {
+    get
+  }
+  public var displayName: Swift.String {
+    get
+  }
+  public static func fromValue(_ value: Swift.Int) -> MapZoneSpeedAlertSDK.VMVehicleType
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc public class MapZoneTrackingManager : ObjectiveC.NSObject {
+  @objc public static let shared: MapZoneSpeedAlertSDK.MapZoneTrackingManager
+  @objc public var onLocationUpdate: ((Foundation.NSDictionary) -> Swift.Void)?
+  @objc public var onTrackingStatusChanged: ((Foundation.NSDictionary) -> Swift.Void)?
+  @objc public var onError: ((Swift.String) -> Swift.Void)?
+  @objc public var onPermissionChanged: ((Swift.String) -> Swift.Void)?
+  @objc public var onRouteUpdate: ((Swift.Bool, Foundation.NSDictionary?) -> Swift.Void)?
+  @objc public enum SpeedStatus : Swift.Int {
+    case safe = 0
+    case nearLimit = 1
+    case overLimit = 2
+    #if compiler(>=5.3) && $NonescapableTypes
+    public init?(rawValue: Swift.Int)
+    #endif
+    public typealias RawValue = Swift.Int
+    public var rawValue: Swift.Int {
+      get
+    }
+  }
+  public var onSpeedSignBitmapChanged: ((UIKit.UIImage?, MapZoneSpeedAlertSDK.MapZoneTrackingManager.SpeedStatus, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int) -> Swift.Void)?
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc convenience public init(apiKey: Swift.String? = nil)
+  #endif
+  @objc deinit
+  @objc public func initialize(apiKey: Swift.String, baseURL: Swift.String)
+  @objc public func configure(apiKey: Swift.String)
+  @objc public func configure(baseURL: Swift.String)
+  @objc public func configure(apiVersion: Swift.String)
+  @objc public func setTrackingStatus(_ status: Swift.String)
+  @objc public func configure(apiKey: Swift.String, baseURL: Swift.String, autoUpload: Swift.Bool = true)
+  @objc public func setAutoUpload(enabled: Swift.Bool)
+  @objc public func setVehicleId(_ vehicleId: Swift.String)
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func setDriverId(_ driverId: Swift.String?)
+  #endif
+  @objc public func getVehicleId() -> Swift.String
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func getDriverId() -> Swift.String?
+  #endif
+  @objc public func onAppBackground()
+  @objc public func onAppForeground()
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func getCurrentLocation() -> Foundation.NSDictionary?
+  #endif
+  @objc public func isTrackingActive() -> Swift.Bool
+  @objc public func getTrackingStatus() -> Foundation.NSDictionary
+  @objc public func requestLocationPermissions(completion: @escaping (Swift.String) -> Swift.Void)
+  @objc public func requestAlwaysLocationPermissions(completion: @escaping (Swift.String) -> Swift.Void)
+  @objc public func hasLocationPermissions() -> Swift.Bool
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func startTracking(enhancedBackgroundMode: Swift.Bool, intervalMs: Swift.Int, distanceFilter: Swift.Double, completion: @escaping (Swift.Bool, Swift.String?) -> Swift.Void)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func stopTracking(completion: @escaping (Swift.Bool, Swift.String?) -> Swift.Void)
+  #endif
+  @objc public func turnOnAlert(completion: @escaping (Swift.Bool) -> Swift.Void)
+  @objc public func turnOffAlert(completion: @escaping (Swift.Bool) -> Swift.Void)
+  @objc public func configureAlertAPI(apiKey: Swift.String, apiID: Swift.String, url: Swift.String = "https://drive-api.mapzone.vn/fleetwork/api/Alert/v2/mpp")
+  @objc public func configureZoneNetworkV2(baseUrl: Swift.String)
+  @objc public func resetZoneNetworkV2()
+  @objc(processLocationWithVehicleTypeLatitude:longitude:speed:heading:vehicleId:vehicleTypeEnum:seats:weights:) public func processLocationWithVehicleType(latitude: Swift.Double, longitude: Swift.Double, speed: Swift.Double, heading: Swift.Double, vehicleId: Swift.String = "1", vehicleType: MapZoneSpeedAlertSDK.VMVehicleType = .car, seats: Swift.Int = 5, weights: Swift.Double = 1500.0)
+  @objc public func processLocationWithVehicleParams(latitude: Swift.Double, longitude: Swift.Double, speed: Swift.Double, heading: Swift.Double, vehicleId: Swift.String = "1", vehicleType: Swift.Int = 1, seats: Swift.Int = 5, weights: Swift.Double = 1500.0)
+  @objc(configureVehicleWithVehicleId:vehicleTypeEnum:seats:weight:) public func configureVehicleWithType(vehicleId: Swift.String, vehicleType: MapZoneSpeedAlertSDK.VMVehicleType, seats: Swift.Int, weight: Swift.Double)
+  @objc public func configureVehicle(vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weight: Swift.Double, maxProvision: Swift.Int)
+  @objc public func getVehicleConfiguration() -> Foundation.NSDictionary
+  @objc public func processExternalLocation(latitude: Swift.Double, longitude: Swift.Double, speed: Swift.Double, heading: Swift.Double)
+  @objc public func processExternalLocation(_ location: _LocationEssentials.CLLocation)
+  @objc public func getCurrentLocationMode() -> MapZoneSpeedAlertSDK.VMLocationMode
+  @objc public func isSpeedAlertCurrentlyActive() -> Swift.Bool
+  @objc public func getCachedLocationsCount() -> Swift.Int
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func uploadCachedLocationsManually(completion: @escaping (Swift.Bool, Swift.String?) -> Swift.Void)
+  #endif
+  @objc public func clearCachedLocations()
+  @objc public func isNetworkConnected() -> Swift.Bool
+  @objc public func getTrackingHealthStatus() -> Foundation.NSDictionary
+}
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager : CoreLocation.CLLocationManagerDelegate {
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didUpdateLocations locations: [_LocationEssentials.CLLocation])
+  @objc dynamic public func processSpeedAlertUsingCPP(location: _LocationEssentials.CLLocation, vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Double)
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didFailWithError error: any Swift.Error)
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didChangeAuthorization status: CoreLocation.CLAuthorizationStatus)
+}
+@available(iOS 14.0, *)
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @available(iOS 14.0, *)
+  @objc dynamic public func startEnhancedTracking(highAccuracyMode: Swift.Bool = false, completion: @escaping (Swift.Bool, Swift.String?) -> Swift.Void)
+  #endif
+  @available(iOS 14.0, *)
+  @objc dynamic public func getEnhancedLocationStatus() -> Foundation.NSDictionary
+  @objc dynamic public func requestFullLocationAccuracy()
+}
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager {
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc dynamic public func startTracking(backgroundMode: Swift.Bool, intervalMs: Swift.Int, forceUpdateBackground: Swift.Bool, distanceFilter: Swift.Double, completion: @escaping (Swift.Bool, Swift.String?) -> Swift.Void)
+  #endif
+}
+@_inheritsConvenienceInitializers @objc public class EnhancedLocationManager : ObjectiveC.NSObject {
+  @objc public var onLocationUpdate: ((_LocationEssentials.CLLocation, Swift.String, Swift.String) -> Swift.Void)?
+  @objc public var onLocationError: ((Swift.String) -> Swift.Void)?
+  @objc public var onAuthorizationChanged: ((CoreLocation.CLAuthorizationStatus) -> Swift.Void)?
+  @objc override dynamic public init()
+  @available(iOS 14.0, *)
+  @objc public func startTracking(highAccuracyMode: Swift.Bool = false)
+  @objc public func stopTracking()
+  @available(iOS 14.0, *)
+  @objc public func requestLocationPermissions()
+  @objc public func isTracking() -> Swift.Bool
+  #if compiler(>=5.3) && $NonescapableTypes
+  @objc public func getLastKnownLocation() -> _LocationEssentials.CLLocation?
+  #endif
+  @available(iOS 14.0, *)
+  @objc public func getLocationServicesStatus() -> Swift.String
+  @objc public func requestFullAccuracy()
+  @objc public func setCustomAccuracy(_ accuracy: _LocationEssentials.CLLocationAccuracy, distanceFilter: _LocationEssentials.CLLocationDistance)
+  @available(iOS 14.0, *)
+  @objc public func enableBackgroundLocationUpdates(_ enable: Swift.Bool)
+  @objc deinit
+}
+extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocationManagerDelegate {
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didUpdateLocations locations: [_LocationEssentials.CLLocation])
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didFailWithError error: any Swift.Error)
+  @objc dynamic public func locationManager(_ manager: CoreLocation.CLLocationManager, didChangeAuthorization status: CoreLocation.CLAuthorizationStatus)
+  @available(iOS 14.0, *)
+  @objc dynamic public func locationManagerDidChangeAuthorization(_ manager: CoreLocation.CLLocationManager)
+}
+public struct VMGeoPoint {
+  public let latitude: Swift.Double
+  public let longitude: Swift.Double
+  public init(latitude: Swift.Double, longitude: Swift.Double)
+}
+public struct VMRouteProgress {
+  public var currentLinkIndex: Swift.Int
+  public var segmentProgress: Swift.Double
+  public var totalRouteProgress: Swift.Double
+  public var snappedPosition: MapZoneSpeedAlertSDK.VMGeoPoint
+  public var distanceToRoute: Swift.Double
+  public init()
+}
+public struct VMSnapResult {
+  public var distance: Swift.Double
+  public var progress: Swift.Double
+  public var snappedPoint: MapZoneSpeedAlertSDK.VMGeoPoint
+  public init()
+  public init(distance: Swift.Double, progress: Swift.Double, snappedPoint: MapZoneSpeedAlertSDK.VMGeoPoint)
+}
+public struct VMEnhancedLocation {
+  public let position: MapZoneSpeedAlertSDK.VMGeoPoint
+  public let speed: Swift.Double
+  public let heading: Swift.Double
+  public let accuracy: Swift.Double
+  public let confidenceScore: Swift.Double
+  public let timestamp: Foundation.Date
+  public init(latitude: Swift.Double, longitude: Swift.Double, speed: Swift.Double, heading: Swift.Double, accuracy: Swift.Double)
+}
+public struct VMAdaptiveGPSConfig {
+  public var slowInterval: Swift.Double
+  public var normalInterval: Swift.Double
+  public var fastInterval: Swift.Double
+  public var distanceFilter: Swift.Double
+  public init()
+  public func getIntervalForSpeed(_ speed: Swift.Double) -> Foundation.TimeInterval
+  public func getDistanceFilterForSpeed(_ speed: Swift.Double) -> Swift.Double
+}
+public enum VMTransportMode {
+  case walking, cycling, motorcycle, car, bus, unknown
+  public static func == (a: MapZoneSpeedAlertSDK.VMTransportMode, b: MapZoneSpeedAlertSDK.VMTransportMode) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public struct VMContextualAlert {
+  public var message: Swift.String
+  public var priority: Swift.Int
+  public var shouldSpeak: Swift.Bool
+  public var shouldVibrate: Swift.Bool
+  public var suggestedAction: Swift.String
+  public init()
+}
+public class VMSpeedAlertState {
+  public var currentLinkIndex: Swift.Int
+  public var previousSpeedLimit: Swift.Int
+  public var forceAnnounceNext: Swift.Bool
+  public var currentRouteProgress: MapZoneSpeedAlertSDK.VMRouteProgress
+  public var hasRouteProgress: Swift.Bool
+  public var consecutiveOffRouteCount: Swift.Int
+  public var lastSnappedDistance: Swift.Double
+  public var routeExitDetected: Swift.Bool
+  public init()
+  public func reset()
+  @objc deinit
+}
+extension MapZoneSpeedAlertSDK.VMLocationMode : Swift.Equatable {}
+extension MapZoneSpeedAlertSDK.VMLocationMode : Swift.Hashable {}
+extension MapZoneSpeedAlertSDK.VMLocationMode : Swift.RawRepresentable {}
+extension MapZoneSpeedAlertSDK.VMVehicleType : Swift.Equatable {}
+extension MapZoneSpeedAlertSDK.VMVehicleType : Swift.Hashable {}
+extension MapZoneSpeedAlertSDK.VMVehicleType : Swift.RawRepresentable {}
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager.SpeedStatus : Swift.Equatable {}
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager.SpeedStatus : Swift.Hashable {}
+extension MapZoneSpeedAlertSDK.MapZoneTrackingManager.SpeedStatus : Swift.RawRepresentable {}
+extension MapZoneSpeedAlertSDK.VMTransportMode : Swift.Equatable {}
+extension MapZoneSpeedAlertSDK.VMTransportMode : Swift.Hashable {}

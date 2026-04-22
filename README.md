@@ -1,4 +1,4 @@
-# VietmapSpeedAlertSDK – iOS Integration (Graph Engine V2)
+# MapZoneSpeedAlertSDK – iOS Integration (Graph Engine V2)
 
 This SDK is provided only for Vietmap MAPs API enterprise customers. Contact your Vietmap account manager for access or [Vietmap Solutions](https://zalo.me/3189066936017422854) Zalo OA if you are interested in becoming a customer.
 
@@ -19,7 +19,7 @@ This SDK is provided only for Vietmap MAPs API enterprise customers. Contact you
 
 ```ruby
 # Podfile
-pod 'VietmapSpeedAlertSDK'
+pod 'MapZoneSpeedAlertSDK'
 ```
 
 ```bash
@@ -53,7 +53,7 @@ It handles zone data fetching, graph loading, GPS pipeline, bitmaps, and voice i
 ### 1. Create and configure
 
 ```swift
-import VietmapSpeedAlertSDK
+import MapZoneSpeedAlertSDK
 
 let zoneManager = ZoneNetworkManagerV2(
     baseUrl:     "https://dev.fastmap.vn/drivingalert",
