@@ -334,187 +334,137 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
-@class NSDictionary;
-enum VMVehicleType : NSInteger;
-enum VMLocationMode : NSInteger;
-SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK22MapZoneTrackingManager")
-@interface MapZoneTrackingManager : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) MapZoneTrackingManager * _Nonnull shared;)
-+ (MapZoneTrackingManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
-@property (nonatomic, copy) void (^ _Nullable onLocationUpdate)(NSDictionary * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onTrackingStatusChanged)(NSDictionary * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onError)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onPermissionChanged)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onRouteUpdate)(BOOL, NSDictionary * _Nullable);
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (nonnull instancetype)initWithApiKey:(NSString * _Nullable)apiKey;
-- (void)initializeWithApiKey:(NSString * _Nonnull)apiKey baseURL:(NSString * _Nonnull)baseURL;
-- (void)configureWithApiKey:(NSString * _Nonnull)apiKey;
-- (void)configureWithBaseURL:(NSString * _Nonnull)baseURL;
-- (void)configureWithApiVersion:(NSString * _Nonnull)apiVersion;
-- (void)setTrackingStatus:(NSString * _Nonnull)status;
-- (void)configureWithApiKey:(NSString * _Nonnull)apiKey baseURL:(NSString * _Nonnull)baseURL autoUpload:(BOOL)autoUpload;
-- (void)setAutoUploadWithEnabled:(BOOL)enabled;
-- (void)setVehicleId:(NSString * _Nonnull)vehicleId;
-- (void)setDriverId:(NSString * _Nullable)driverId;
-- (NSString * _Nonnull)getVehicleId SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nullable)getDriverId SWIFT_WARN_UNUSED_RESULT;
-- (void)onAppBackground;
-- (void)onAppForeground;
-- (NSDictionary * _Nullable)getCurrentLocation SWIFT_WARN_UNUSED_RESULT;
-- (BOOL)isTrackingActive SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary * _Nonnull)getTrackingStatus SWIFT_WARN_UNUSED_RESULT;
-- (void)requestLocationPermissionsWithCompletion:(void (^ _Nonnull)(NSString * _Nonnull))completion;
-- (void)requestAlwaysLocationPermissionsWithCompletion:(void (^ _Nonnull)(NSString * _Nonnull))completion;
-- (BOOL)hasLocationPermissions SWIFT_WARN_UNUSED_RESULT;
-- (void)startTrackingWithEnhancedBackgroundMode:(BOOL)enhancedBackgroundMode intervalMs:(NSInteger)intervalMs distanceFilter:(double)distanceFilter completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)stopTrackingWithCompletion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)turnOnAlertWithCompletion:(void (^ _Nonnull)(BOOL))completion;
-- (void)turnOffAlertWithCompletion:(void (^ _Nonnull)(BOOL))completion;
-- (void)configureAlertAPIWithApiKey:(NSString * _Nonnull)apiKey apiID:(NSString * _Nonnull)apiID url:(NSString * _Nonnull)url;
-/// Kích hoạt tích hợp GraphEngine v2 với Zone Network API.
-/// Sau khi gọi hàm này, mỗi GPS update sẽ:
-/// <ol>
-///   <li>
-///     Tự động fetch dữ liệu bản đồ từ Zone Network API (nếu cần)
-///   </li>
-///   <li>
-///     Map-match vị trí GPS vào graph v2
-///   </li>
-///   <li>
-///     Gọi <code>onGraphV2Result</code> với kết quả cảnh báo
-///   </li>
-/// </ol>
-/// \param baseUrl Địa chỉ gốc API, ví dụ “https://dev.fastmap.vn/drivingalert”
+/// Entry point for the MapZone Speed Alert engine on iOS.
+/// Holds the configuration for a single vehicle profile and forwards each
+/// GPS update to the native engine. The engine performs zone loading,
+/// map-matching, speed-sign bitmap rendering, and voice clip generation
+/// on background queues; this class only schedules work and dispatches
+/// results back to the main thread.
+/// <h3>Usage</h3>
+/// \code
+/// // 1. Create with vehicle credentials and profile.
+/// let manager = ZoneNetworkManager(
+///     baseUrl: "https://driving.map.zone",
+///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
+///     bundleId: Bundle.main.bundleIdentifier ?? "",
+///     vehicleId: "<vehicleId>",
+///     vehicleType: 1, seats: 1, weights: 1)
 ///
-- (void)configureZoneNetworkV2WithBaseUrl:(NSString * _Nonnull)baseUrl;
-/// Xóa cache và reset engine v2 (dùng khi thay đổi vehicleType/seats/weights).
-- (void)resetZoneNetworkV2;
-/// Process location with vehicle type enum for speed alerts.
-/// @param latitude Latitude coordinate
-/// @param longitude Longitude coordinate
-/// @param speed Current speed in m/s
-/// @param heading Current heading in degrees
-/// @param vehicleId Unique identifier for the vehicle (default: 1)
-/// @param vehicleType Type of vehicle using VMVehicleType enum (default: .car)
-/// @param seats Number of seats in the vehicle (default: 5)
-/// @param weights Vehicle weight in kg (default: 1500.0)
-- (void)processLocationWithVehicleTypeLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading vehicleId:(NSString * _Nonnull)vehicleId vehicleTypeEnum:(enum VMVehicleType)vehicleType seats:(NSInteger)seats weights:(double)weights;
-/// Process location with custom vehicle parameters for speed alerts (backward compatibility)
-/// @param latitude Latitude coordinate
-/// @param longitude Longitude coordinate<br/>
-/// @param speed Current speed in m/s
-/// @param heading Current heading in degrees
-/// @param vehicleId Unique identifier for the vehicle (default: 1)
-/// @param vehicleType Type of vehicle - 1=Car, 2=Truck, etc. (default: 1)
-/// @param seats Number of seats in the vehicle (default: 5)
-/// @param weights Vehicle weight in kg (default: 1500.0)
-- (void)processLocationWithVehicleParamsWithLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(double)weights;
-/// Configure vehicle information for speed alerts (using VMVehicleType enum)
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle using VMVehicleType enum
-/// @param seats Number of seats in the vehicle
-/// @param weight Vehicle weight in kg
-/// @param maxProvision Maximum provision value
-- (void)configureVehicleWithVehicleId:(NSString * _Nonnull)vehicleId vehicleTypeEnum:(enum VMVehicleType)vehicleType seats:(NSInteger)seats weight:(double)weight;
-/// Configure vehicle information for speed alerts (backward compatibility)
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle (1 = Car, 2 = Truck, etc.)
-/// @param seats Number of seats in the vehicle
-/// @param weight Vehicle weight in kg
-/// @param maxProvision Maximum provision value
-- (void)configureVehicleWithVehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weight:(double)weight maxProvision:(NSInteger)maxProvision;
-/// Get current vehicle configuration
-- (NSDictionary * _Nonnull)getVehicleConfiguration SWIFT_WARN_UNUSED_RESULT;
-/// Process external location input for speed alerts
-/// This method allows feeding location data from external sources
-/// Auto-switches from GPS to external input mode when called
-/// @param speed Speed value (km/h preferred). Values ≤ 30 are treated as m/s and converted once.
-- (void)processExternalLocationWithLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading;
-/// Process external location input with CLLocation object
-/// Convenience method for existing CLLocation objects (speed usually in m/s)
-- (void)processExternalLocation:(CLLocation * _Nonnull)location;
-/// Get current location mode
-- (enum VMLocationMode)getCurrentLocationMode SWIFT_WARN_UNUSED_RESULT;
-/// Check if speed alerts are currently active
-- (BOOL)isSpeedAlertCurrentlyActive SWIFT_WARN_UNUSED_RESULT;
-- (NSInteger)getCachedLocationsCount SWIFT_WARN_UNUSED_RESULT;
-- (void)uploadCachedLocationsManuallyWithCompletion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)clearCachedLocations;
-- (BOOL)isNetworkConnected SWIFT_WARN_UNUSED_RESULT;
-/// Gets comprehensive tracking status for debugging
-- (NSDictionary * _Nonnull)getTrackingHealthStatus SWIFT_WARN_UNUSED_RESULT;
-@end
-
-/// Speed status enum matching C++ SpeedStatus
-typedef SWIFT_ENUM(NSInteger, SpeedStatus, open) {
-  SpeedStatusSafe = 0,
-  SpeedStatusNearLimit = 1,
-  SpeedStatusOverLimit = 2,
-};
-
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK))
-- (void)startTrackingWithBackgroundMode:(BOOL)backgroundMode intervalMs:(NSInteger)intervalMs forceUpdateBackground:(BOOL)forceUpdateBackground distanceFilter:(double)distanceFilter completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-@end
-
-SWIFT_AVAILABILITY(ios,introduced=14.0)
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK))
-- (void)startEnhancedTrackingWithHighAccuracyMode:(BOOL)highAccuracyMode completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion SWIFT_AVAILABILITY(ios,introduced=14.0);
-- (NSDictionary * _Nonnull)getEnhancedLocationStatus SWIFT_WARN_UNUSED_RESULT SWIFT_AVAILABILITY(ios,introduced=14.0);
-- (void)requestFullLocationAccuracy;
-@end
-
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK)) <CLLocationManagerDelegate>
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didUpdateLocations:(NSArray<CLLocation *> * _Nonnull)locations;
-/// Process speed alert using C++ with custom vehicle parameters
-/// @param location Current location data
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle (1 = Car, 2 = Truck, etc.)
-/// @param seats Number of seats in the vehicle
-/// @param weights Vehicle weight in kg
-- (void)processSpeedAlertUsingCPPWithLocation:(CLLocation * _Nonnull)location vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(double)weights;
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didFailWithError:(NSError * _Nonnull)error;
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status;
-@end
-
-typedef SWIFT_ENUM(NSInteger, VMLocationMode, open) {
-  VMLocationModeGpsCallback = 0,
-  VMLocationModeExternalInput = 1,
-};
-
-typedef SWIFT_ENUM(NSInteger, VMVehicleType, open) {
-  VMVehicleTypeCar = 1,
-  VMVehicleTypeTaxi = 2,
-  VMVehicleTypeBus = 3,
-  VMVehicleTypeCoach = 4,
-  VMVehicleTypeTruck = 5,
-  VMVehicleTypeTrailer = 6,
-  VMVehicleTypeCycle = 7,
-  VMVehicleTypeBike = 8,
-  VMVehicleTypePedestrian = 9,
-  VMVehicleTypeSemiTrailer = 10,
-};
-
-/// ZoneNetworkManagerV2 — thin Swift wrapper around MapZoneGraphBridgeV2.
-/// All heavy work (HTTP fetch, base64/XOR decrypt, JSON parse, engine loading)
-/// runs inside C++.  Swift only:
-/// • schedules background execution
-/// • delivers bitmaps to the UI  (via onBitmap closure)
-/// • speaks voice (TTS) at the call site
-SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK20ZoneNetworkManagerV2")
-@interface ZoneNetworkManagerV2 : NSObject
-/// Called on main thread when zone data is freshly loaded.
+/// // 2. Subscribe to UI events.
+/// manager.onReady   = { links, alerts in ... }
+/// manager.onBitmap  = { current, status, next, nextDist,
+///                       camera, camDist, toll, tollDist, voiceWav in ... }
+/// manager.onResult = { success, code, message in ... }
+///
+/// // 3. Feed every GPS frame.
+/// manager.updateLocation(lat: lat, lng: lng,
+///                        speedKmh: speedKmh, bearingDeg: bearing)
+/// manager.processGps(lat: lat, lng: lng, bearing: bearing,
+///                    speedKmh: speedKmh, accuracy: accuracy)
+///
+/// \endcodeAll public methods are safe to call from the main thread. Internally
+/// the manager uses a single serial dispatch queue so calls are
+/// serialised — concurrent <code>updateLocation</code> and <code>processGps</code> will not
+/// race against each other.
+SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
+@interface ZoneNetworkManager : NSObject
+/// Fired on the main thread after each successful zone load.
+/// Use it to enable UI that depends on having data — e.g. show the
+/// speed-sign panel, or refresh a debug overlay with the new zone
+/// bbox. Parameters are <code>(linkCount, alertCount)</code>.
 @property (nonatomic, copy) void (^ _Nullable onReady)(NSInteger, NSInteger);
-- (nonnull instancetype)initWithBaseUrl:(NSString * _Nonnull)baseUrl vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights OBJC_DESIGNATED_INITIALIZER;
-/// Trigger a zone data reload if the position has moved outside the cached zone.
-/// HTTP fetch + decrypt + parse + engine load all happen in C++ on a background
-/// queue; Swift only schedules and reports back.
+/// Fired on the main thread after every zone-reload attempt.
+/// Useful for surfacing server-side errors to the user.
+/// <ul>
+///   <li>
+///     <code>success</code>: <code>true</code> when fresh zone data was loaded.
+///   </li>
+///   <li>
+///     <code>errorCode</code>: <code>0</code> on success. Positive values are server-reported
+///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
+///     <code>3003</code> vehicle type not supported). Negative values are local
+///     SDK failures (network, parse).
+///   </li>
+///   <li>
+///     <code>errorMessage</code>: human-readable detail, may be empty on success.
+///   </li>
+/// </ul>
+@property (nonatomic, copy) void (^ _Nullable onResult)(BOOL, NSInteger, NSString * _Nonnull);
+/// Create a manager for the authenticated profile.
+/// note:
+/// Throws an Objective-C exception with name
+/// <code>"InvalidArgument"</code> if <code>baseUrl</code> does not start with <code>https://</code>.
+/// \param baseUrl Bare host of the zone API, e.g.
+/// <code>"https://driving.map.zone"</code>. Must start with <code>https://</code>.
+///
+/// \param apiKeyId Public API Key ID issued for this app.
+///
+/// \param apiKey Authentication secret paired with <code>apiKeyId</code>. Treat
+/// it as a credential: do not log it, embed it in source
+/// control, or expose it in user-facing UI.
+///
+/// \param bundleId Application bundle ID whitelisted for this key,
+/// typically <code>Bundle.main.bundleIdentifier</code>.
+///
+/// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
+///
+/// \param vehicleType Vehicle category code (see SDK integration guide).
+///
+/// \param seats Number of seats — used to filter applicable alerts.
+///
+/// \param weights Vehicle gross weight in kg — used to filter applicable alerts.
+///
+- (nonnull instancetype)initWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey bundleId:(NSString * _Nonnull)bundleId vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights OBJC_DESIGNATED_INITIALIZER;
+/// Notify the engine of a position change without motion context.
+/// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
+/// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should
+/// prefer the four-argument overload so the engine can prefetch the
+/// next zone earlier when driving fast and along the heading.
 - (void)updateLocationWithLat:(double)lat lng:(double)lng;
-/// Pass raw GPS to C++ for map-matching, alert scanning and bitmap generation.
-/// @param speedKmh GPS speed in km/h
+/// Notify the engine of a position change with motion context.
+/// Safe to call on the main thread — the actual zone work runs on a
+/// background queue. Call this on every GPS update. The engine
+/// internally throttles network requests, so calling at 1 Hz costs
+/// nothing when the vehicle hasn’t moved far enough to warrant a
+/// reload.
+/// \param lat Latitude in degrees (WGS84).
+///
+/// \param lng Longitude in degrees (WGS84).
+///
+/// \param speedKmh Current GPS speed in km/h. Forwarded to the engine
+/// so the prefetch margin scales with speed: faster driving
+/// triggers the next zone fetch further ahead of the edge.
+///
+/// \param bearingDeg Heading in degrees (0 = N, 90 = E). The request
+/// sent to the server is projected ~400m forward along this
+/// bearing so an edge-of-zone GPS does not produce a
+/// same-zone response. Pass <code>.nan</code> when bearing is unknown.
+///
+- (void)updateLocationWithLat:(double)lat lng:(double)lng speedKmh:(double)speedKmh bearingDeg:(double)bearingDeg;
+/// Feed a GPS frame to the matching and alert pipeline.
+/// This drives the per-tick UI: map-matching, current speed-sign
+/// lookup, “next sign / camera / toll” preview, speeding detection,
+/// and voice cue generation. Call once per GPS update, after
+/// <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
+/// Runs on the same serial queue as <code>updateLocation</code>, so the engine
+/// never sees a <code>processGps</code> call mid-way through a zone reload.
+/// \param lat Latitude in degrees (WGS84).
+///
+/// \param lng Longitude in degrees (WGS84).
+///
+/// \param bearing Heading in degrees (0 = N, 90 = E).
+///
+/// \param speedKmh Current speed in km/h.
+///
+/// \param accuracy Horizontal accuracy radius in metres
+/// (<code>CLLocation.horizontalAccuracy</code>).
+///
 - (void)processGpsWithLat:(double)lat lng:(double)lng bearing:(double)bearing speedKmh:(double)speedKmh accuracy:(double)accuracy;
-/// Reset C++ engine (use when vehicle params change).
+/// Clear all loaded zone data and reset internal state.
+/// Call this when the vehicle profile changes (e.g. driver swaps
+/// <code>vehicleType</code> / <code>seats</code> / <code>weights</code>) or when the user ends a
+/// navigation session and you want to free the engine’s memory. The
+/// next <code>updateLocation</code> call will trigger a fresh fetch.
 - (void)reset;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
@@ -864,187 +814,137 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
-@class NSDictionary;
-enum VMVehicleType : NSInteger;
-enum VMLocationMode : NSInteger;
-SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK22MapZoneTrackingManager")
-@interface MapZoneTrackingManager : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) MapZoneTrackingManager * _Nonnull shared;)
-+ (MapZoneTrackingManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
-@property (nonatomic, copy) void (^ _Nullable onLocationUpdate)(NSDictionary * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onTrackingStatusChanged)(NSDictionary * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onError)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onPermissionChanged)(NSString * _Nonnull);
-@property (nonatomic, copy) void (^ _Nullable onRouteUpdate)(BOOL, NSDictionary * _Nullable);
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (nonnull instancetype)initWithApiKey:(NSString * _Nullable)apiKey;
-- (void)initializeWithApiKey:(NSString * _Nonnull)apiKey baseURL:(NSString * _Nonnull)baseURL;
-- (void)configureWithApiKey:(NSString * _Nonnull)apiKey;
-- (void)configureWithBaseURL:(NSString * _Nonnull)baseURL;
-- (void)configureWithApiVersion:(NSString * _Nonnull)apiVersion;
-- (void)setTrackingStatus:(NSString * _Nonnull)status;
-- (void)configureWithApiKey:(NSString * _Nonnull)apiKey baseURL:(NSString * _Nonnull)baseURL autoUpload:(BOOL)autoUpload;
-- (void)setAutoUploadWithEnabled:(BOOL)enabled;
-- (void)setVehicleId:(NSString * _Nonnull)vehicleId;
-- (void)setDriverId:(NSString * _Nullable)driverId;
-- (NSString * _Nonnull)getVehicleId SWIFT_WARN_UNUSED_RESULT;
-- (NSString * _Nullable)getDriverId SWIFT_WARN_UNUSED_RESULT;
-- (void)onAppBackground;
-- (void)onAppForeground;
-- (NSDictionary * _Nullable)getCurrentLocation SWIFT_WARN_UNUSED_RESULT;
-- (BOOL)isTrackingActive SWIFT_WARN_UNUSED_RESULT;
-- (NSDictionary * _Nonnull)getTrackingStatus SWIFT_WARN_UNUSED_RESULT;
-- (void)requestLocationPermissionsWithCompletion:(void (^ _Nonnull)(NSString * _Nonnull))completion;
-- (void)requestAlwaysLocationPermissionsWithCompletion:(void (^ _Nonnull)(NSString * _Nonnull))completion;
-- (BOOL)hasLocationPermissions SWIFT_WARN_UNUSED_RESULT;
-- (void)startTrackingWithEnhancedBackgroundMode:(BOOL)enhancedBackgroundMode intervalMs:(NSInteger)intervalMs distanceFilter:(double)distanceFilter completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)stopTrackingWithCompletion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)turnOnAlertWithCompletion:(void (^ _Nonnull)(BOOL))completion;
-- (void)turnOffAlertWithCompletion:(void (^ _Nonnull)(BOOL))completion;
-- (void)configureAlertAPIWithApiKey:(NSString * _Nonnull)apiKey apiID:(NSString * _Nonnull)apiID url:(NSString * _Nonnull)url;
-/// Kích hoạt tích hợp GraphEngine v2 với Zone Network API.
-/// Sau khi gọi hàm này, mỗi GPS update sẽ:
-/// <ol>
-///   <li>
-///     Tự động fetch dữ liệu bản đồ từ Zone Network API (nếu cần)
-///   </li>
-///   <li>
-///     Map-match vị trí GPS vào graph v2
-///   </li>
-///   <li>
-///     Gọi <code>onGraphV2Result</code> với kết quả cảnh báo
-///   </li>
-/// </ol>
-/// \param baseUrl Địa chỉ gốc API, ví dụ “https://dev.fastmap.vn/drivingalert”
+/// Entry point for the MapZone Speed Alert engine on iOS.
+/// Holds the configuration for a single vehicle profile and forwards each
+/// GPS update to the native engine. The engine performs zone loading,
+/// map-matching, speed-sign bitmap rendering, and voice clip generation
+/// on background queues; this class only schedules work and dispatches
+/// results back to the main thread.
+/// <h3>Usage</h3>
+/// \code
+/// // 1. Create with vehicle credentials and profile.
+/// let manager = ZoneNetworkManager(
+///     baseUrl: "https://driving.map.zone",
+///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
+///     bundleId: Bundle.main.bundleIdentifier ?? "",
+///     vehicleId: "<vehicleId>",
+///     vehicleType: 1, seats: 1, weights: 1)
 ///
-- (void)configureZoneNetworkV2WithBaseUrl:(NSString * _Nonnull)baseUrl;
-/// Xóa cache và reset engine v2 (dùng khi thay đổi vehicleType/seats/weights).
-- (void)resetZoneNetworkV2;
-/// Process location with vehicle type enum for speed alerts.
-/// @param latitude Latitude coordinate
-/// @param longitude Longitude coordinate
-/// @param speed Current speed in m/s
-/// @param heading Current heading in degrees
-/// @param vehicleId Unique identifier for the vehicle (default: 1)
-/// @param vehicleType Type of vehicle using VMVehicleType enum (default: .car)
-/// @param seats Number of seats in the vehicle (default: 5)
-/// @param weights Vehicle weight in kg (default: 1500.0)
-- (void)processLocationWithVehicleTypeLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading vehicleId:(NSString * _Nonnull)vehicleId vehicleTypeEnum:(enum VMVehicleType)vehicleType seats:(NSInteger)seats weights:(double)weights;
-/// Process location with custom vehicle parameters for speed alerts (backward compatibility)
-/// @param latitude Latitude coordinate
-/// @param longitude Longitude coordinate<br/>
-/// @param speed Current speed in m/s
-/// @param heading Current heading in degrees
-/// @param vehicleId Unique identifier for the vehicle (default: 1)
-/// @param vehicleType Type of vehicle - 1=Car, 2=Truck, etc. (default: 1)
-/// @param seats Number of seats in the vehicle (default: 5)
-/// @param weights Vehicle weight in kg (default: 1500.0)
-- (void)processLocationWithVehicleParamsWithLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(double)weights;
-/// Configure vehicle information for speed alerts (using VMVehicleType enum)
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle using VMVehicleType enum
-/// @param seats Number of seats in the vehicle
-/// @param weight Vehicle weight in kg
-/// @param maxProvision Maximum provision value
-- (void)configureVehicleWithVehicleId:(NSString * _Nonnull)vehicleId vehicleTypeEnum:(enum VMVehicleType)vehicleType seats:(NSInteger)seats weight:(double)weight;
-/// Configure vehicle information for speed alerts (backward compatibility)
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle (1 = Car, 2 = Truck, etc.)
-/// @param seats Number of seats in the vehicle
-/// @param weight Vehicle weight in kg
-/// @param maxProvision Maximum provision value
-- (void)configureVehicleWithVehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weight:(double)weight maxProvision:(NSInteger)maxProvision;
-/// Get current vehicle configuration
-- (NSDictionary * _Nonnull)getVehicleConfiguration SWIFT_WARN_UNUSED_RESULT;
-/// Process external location input for speed alerts
-/// This method allows feeding location data from external sources
-/// Auto-switches from GPS to external input mode when called
-/// @param speed Speed value (km/h preferred). Values ≤ 30 are treated as m/s and converted once.
-- (void)processExternalLocationWithLatitude:(double)latitude longitude:(double)longitude speed:(double)speed heading:(double)heading;
-/// Process external location input with CLLocation object
-/// Convenience method for existing CLLocation objects (speed usually in m/s)
-- (void)processExternalLocation:(CLLocation * _Nonnull)location;
-/// Get current location mode
-- (enum VMLocationMode)getCurrentLocationMode SWIFT_WARN_UNUSED_RESULT;
-/// Check if speed alerts are currently active
-- (BOOL)isSpeedAlertCurrentlyActive SWIFT_WARN_UNUSED_RESULT;
-- (NSInteger)getCachedLocationsCount SWIFT_WARN_UNUSED_RESULT;
-- (void)uploadCachedLocationsManuallyWithCompletion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-- (void)clearCachedLocations;
-- (BOOL)isNetworkConnected SWIFT_WARN_UNUSED_RESULT;
-/// Gets comprehensive tracking status for debugging
-- (NSDictionary * _Nonnull)getTrackingHealthStatus SWIFT_WARN_UNUSED_RESULT;
-@end
-
-/// Speed status enum matching C++ SpeedStatus
-typedef SWIFT_ENUM(NSInteger, SpeedStatus, open) {
-  SpeedStatusSafe = 0,
-  SpeedStatusNearLimit = 1,
-  SpeedStatusOverLimit = 2,
-};
-
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK))
-- (void)startTrackingWithBackgroundMode:(BOOL)backgroundMode intervalMs:(NSInteger)intervalMs forceUpdateBackground:(BOOL)forceUpdateBackground distanceFilter:(double)distanceFilter completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
-@end
-
-SWIFT_AVAILABILITY(ios,introduced=14.0)
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK))
-- (void)startEnhancedTrackingWithHighAccuracyMode:(BOOL)highAccuracyMode completion:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion SWIFT_AVAILABILITY(ios,introduced=14.0);
-- (NSDictionary * _Nonnull)getEnhancedLocationStatus SWIFT_WARN_UNUSED_RESULT SWIFT_AVAILABILITY(ios,introduced=14.0);
-- (void)requestFullLocationAccuracy;
-@end
-
-@interface MapZoneTrackingManager (SWIFT_EXTENSION(MapZoneSpeedAlertSDK)) <CLLocationManagerDelegate>
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didUpdateLocations:(NSArray<CLLocation *> * _Nonnull)locations;
-/// Process speed alert using C++ with custom vehicle parameters
-/// @param location Current location data
-/// @param vehicleId Unique identifier for the vehicle
-/// @param vehicleType Type of vehicle (1 = Car, 2 = Truck, etc.)
-/// @param seats Number of seats in the vehicle
-/// @param weights Vehicle weight in kg
-- (void)processSpeedAlertUsingCPPWithLocation:(CLLocation * _Nonnull)location vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(double)weights;
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didFailWithError:(NSError * _Nonnull)error;
-- (void)locationManager:(CLLocationManager * _Nonnull)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status;
-@end
-
-typedef SWIFT_ENUM(NSInteger, VMLocationMode, open) {
-  VMLocationModeGpsCallback = 0,
-  VMLocationModeExternalInput = 1,
-};
-
-typedef SWIFT_ENUM(NSInteger, VMVehicleType, open) {
-  VMVehicleTypeCar = 1,
-  VMVehicleTypeTaxi = 2,
-  VMVehicleTypeBus = 3,
-  VMVehicleTypeCoach = 4,
-  VMVehicleTypeTruck = 5,
-  VMVehicleTypeTrailer = 6,
-  VMVehicleTypeCycle = 7,
-  VMVehicleTypeBike = 8,
-  VMVehicleTypePedestrian = 9,
-  VMVehicleTypeSemiTrailer = 10,
-};
-
-/// ZoneNetworkManagerV2 — thin Swift wrapper around MapZoneGraphBridgeV2.
-/// All heavy work (HTTP fetch, base64/XOR decrypt, JSON parse, engine loading)
-/// runs inside C++.  Swift only:
-/// • schedules background execution
-/// • delivers bitmaps to the UI  (via onBitmap closure)
-/// • speaks voice (TTS) at the call site
-SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK20ZoneNetworkManagerV2")
-@interface ZoneNetworkManagerV2 : NSObject
-/// Called on main thread when zone data is freshly loaded.
+/// // 2. Subscribe to UI events.
+/// manager.onReady   = { links, alerts in ... }
+/// manager.onBitmap  = { current, status, next, nextDist,
+///                       camera, camDist, toll, tollDist, voiceWav in ... }
+/// manager.onResult = { success, code, message in ... }
+///
+/// // 3. Feed every GPS frame.
+/// manager.updateLocation(lat: lat, lng: lng,
+///                        speedKmh: speedKmh, bearingDeg: bearing)
+/// manager.processGps(lat: lat, lng: lng, bearing: bearing,
+///                    speedKmh: speedKmh, accuracy: accuracy)
+///
+/// \endcodeAll public methods are safe to call from the main thread. Internally
+/// the manager uses a single serial dispatch queue so calls are
+/// serialised — concurrent <code>updateLocation</code> and <code>processGps</code> will not
+/// race against each other.
+SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
+@interface ZoneNetworkManager : NSObject
+/// Fired on the main thread after each successful zone load.
+/// Use it to enable UI that depends on having data — e.g. show the
+/// speed-sign panel, or refresh a debug overlay with the new zone
+/// bbox. Parameters are <code>(linkCount, alertCount)</code>.
 @property (nonatomic, copy) void (^ _Nullable onReady)(NSInteger, NSInteger);
-- (nonnull instancetype)initWithBaseUrl:(NSString * _Nonnull)baseUrl vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights OBJC_DESIGNATED_INITIALIZER;
-/// Trigger a zone data reload if the position has moved outside the cached zone.
-/// HTTP fetch + decrypt + parse + engine load all happen in C++ on a background
-/// queue; Swift only schedules and reports back.
+/// Fired on the main thread after every zone-reload attempt.
+/// Useful for surfacing server-side errors to the user.
+/// <ul>
+///   <li>
+///     <code>success</code>: <code>true</code> when fresh zone data was loaded.
+///   </li>
+///   <li>
+///     <code>errorCode</code>: <code>0</code> on success. Positive values are server-reported
+///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
+///     <code>3003</code> vehicle type not supported). Negative values are local
+///     SDK failures (network, parse).
+///   </li>
+///   <li>
+///     <code>errorMessage</code>: human-readable detail, may be empty on success.
+///   </li>
+/// </ul>
+@property (nonatomic, copy) void (^ _Nullable onResult)(BOOL, NSInteger, NSString * _Nonnull);
+/// Create a manager for the authenticated profile.
+/// note:
+/// Throws an Objective-C exception with name
+/// <code>"InvalidArgument"</code> if <code>baseUrl</code> does not start with <code>https://</code>.
+/// \param baseUrl Bare host of the zone API, e.g.
+/// <code>"https://driving.map.zone"</code>. Must start with <code>https://</code>.
+///
+/// \param apiKeyId Public API Key ID issued for this app.
+///
+/// \param apiKey Authentication secret paired with <code>apiKeyId</code>. Treat
+/// it as a credential: do not log it, embed it in source
+/// control, or expose it in user-facing UI.
+///
+/// \param bundleId Application bundle ID whitelisted for this key,
+/// typically <code>Bundle.main.bundleIdentifier</code>.
+///
+/// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
+///
+/// \param vehicleType Vehicle category code (see SDK integration guide).
+///
+/// \param seats Number of seats — used to filter applicable alerts.
+///
+/// \param weights Vehicle gross weight in kg — used to filter applicable alerts.
+///
+- (nonnull instancetype)initWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey bundleId:(NSString * _Nonnull)bundleId vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights OBJC_DESIGNATED_INITIALIZER;
+/// Notify the engine of a position change without motion context.
+/// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
+/// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should
+/// prefer the four-argument overload so the engine can prefetch the
+/// next zone earlier when driving fast and along the heading.
 - (void)updateLocationWithLat:(double)lat lng:(double)lng;
-/// Pass raw GPS to C++ for map-matching, alert scanning and bitmap generation.
-/// @param speedKmh GPS speed in km/h
+/// Notify the engine of a position change with motion context.
+/// Safe to call on the main thread — the actual zone work runs on a
+/// background queue. Call this on every GPS update. The engine
+/// internally throttles network requests, so calling at 1 Hz costs
+/// nothing when the vehicle hasn’t moved far enough to warrant a
+/// reload.
+/// \param lat Latitude in degrees (WGS84).
+///
+/// \param lng Longitude in degrees (WGS84).
+///
+/// \param speedKmh Current GPS speed in km/h. Forwarded to the engine
+/// so the prefetch margin scales with speed: faster driving
+/// triggers the next zone fetch further ahead of the edge.
+///
+/// \param bearingDeg Heading in degrees (0 = N, 90 = E). The request
+/// sent to the server is projected ~400m forward along this
+/// bearing so an edge-of-zone GPS does not produce a
+/// same-zone response. Pass <code>.nan</code> when bearing is unknown.
+///
+- (void)updateLocationWithLat:(double)lat lng:(double)lng speedKmh:(double)speedKmh bearingDeg:(double)bearingDeg;
+/// Feed a GPS frame to the matching and alert pipeline.
+/// This drives the per-tick UI: map-matching, current speed-sign
+/// lookup, “next sign / camera / toll” preview, speeding detection,
+/// and voice cue generation. Call once per GPS update, after
+/// <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
+/// Runs on the same serial queue as <code>updateLocation</code>, so the engine
+/// never sees a <code>processGps</code> call mid-way through a zone reload.
+/// \param lat Latitude in degrees (WGS84).
+///
+/// \param lng Longitude in degrees (WGS84).
+///
+/// \param bearing Heading in degrees (0 = N, 90 = E).
+///
+/// \param speedKmh Current speed in km/h.
+///
+/// \param accuracy Horizontal accuracy radius in metres
+/// (<code>CLLocation.horizontalAccuracy</code>).
+///
 - (void)processGpsWithLat:(double)lat lng:(double)lng bearing:(double)bearing speedKmh:(double)speedKmh accuracy:(double)accuracy;
-/// Reset C++ engine (use when vehicle params change).
+/// Clear all loaded zone data and reset internal state.
+/// Call this when the vehicle profile changes (e.g. driver swaps
+/// <code>vehicleType</code> / <code>seats</code> / <code>weights</code>) or when the user ends a
+/// navigation session and you want to free the engine’s memory. The
+/// next <code>updateLocation</code> call will trigger a fresh fetch.
 - (void)reset;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
