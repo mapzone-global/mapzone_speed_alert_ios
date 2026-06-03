@@ -30,7 +30,7 @@ platform :ios, '12.0'
 use_frameworks!
 
 target 'YourApp' do
-  pod 'MapZoneSpeedAlertSDK', '~> 1.0'
+  pod 'MapZoneSpeedAlertSDK', '~> <lasted-version>'
 end
 ```
 
@@ -142,28 +142,40 @@ zoneManager.onBitmap = { currentImage, speedStatus,
     self.tollLabel.text      = tollImage   != nil ? "\(tollDistMeters)m"   : ""
 
     // First voice clip of the tick (WAV PCM 16-bit LE, mono, 22050 Hz).
+    // NOTE: voiceWavData is the FIRST clip only, and is non-nil ONLY when
+    // `onVoice` is not set. Once `onVoice` is wired, every clip (including the
+    // first) is delivered through `onVoice` and voiceWavData is always nil —
+    // so there is no double playback.
     if let wav = voiceWavData {
-        self.enqueueVoice(wav)
+        self.enqueueVoice(wav, priority: 1)
     }
 }
 
-// (d) Extra voice clips — when several alerts fire on the same tick.
-zoneManager.onVoice = { wav in
-    self.enqueueVoice(wav)
+// (d) Voice — receives EVERY clip of the tick, each tagged with its trigger
+// and priority. The engine already orders them (priority desc, then nearest
+// first), so arrival order is the order you should speak them in.
+//   trigger : alert type — see the Voice Cues & Priority table below
+//   priority: 0 = "current" (lowest, drop first when congested)
+//             1 = normal (approaching / camera / sign)
+//             2 = speeding (most urgent)
+zoneManager.onVoice = { wav, trigger, priority in
+    self.enqueueVoice(wav, priority: priority)
 }
 ```
 
-> **Important — iOS has no built-in voice player.** Unlike the Android SDK, the iOS engine never plays audio for you. Every WAV delivered via `onBitmap` (`voiceWavData`) or `onVoice` must be handled by the host app, or the cue is dropped. A minimal sequential player:
+> **Important — iOS has no built-in voice player.** Unlike the Android SDK, the iOS engine never plays audio for you. Every WAV delivered via `onBitmap` (`voiceWavData`) or `onVoice` must be handled by the host app, or the cue is dropped. A minimal priority-aware sequential player — it inserts by priority (highest first) and keeps arrival order (the engine's travel order) within the same priority, so urgent cues like "speeding" are spoken before stale "current speed limit" ones:
 >
 > ```swift
 > import AVFoundation
 >
-> private var voiceQueue: [Data] = []
+> private var voiceQueue: [(data: Data, priority: Int)] = []
 > private var audioPlayer: AVAudioPlayer?
 > private var playing = false
 >
-> func enqueueVoice(_ data: Data) {
->     voiceQueue.append(data)
+> func enqueueVoice(_ data: Data, priority: Int) {
+>     // Insert before the first clip of strictly lower priority → stable within a tier.
+>     let idx = voiceQueue.firstIndex { $0.priority < priority } ?? voiceQueue.count
+>     voiceQueue.insert((data, priority), at: idx)
 >     if !playing { playNext() }
 > }
 >
@@ -171,13 +183,15 @@ zoneManager.onVoice = { wav in
 >     guard !voiceQueue.isEmpty else { playing = false; return }
 >     let url = URL(fileURLWithPath: NSTemporaryDirectory())
 >         .appendingPathComponent("mzv_\(Int.random(in: 1000...9999)).wav")
->     try? voiceQueue.removeFirst().write(to: url)
+>     try? voiceQueue.removeFirst().data.write(to: url)
 >     audioPlayer = try? AVAudioPlayer(contentsOf: url)
 >     audioPlayer?.delegate = self          // implement audioPlayerDidFinishPlaying -> playNext()
 >     audioPlayer?.play()
 >     playing = true
 > }
 > ```
+>
+> The single-clip `onBitmap` path (legacy hosts that never wire `onVoice`) maps cleanly onto the same queue with `priority: 1`.
 
 ### 3. Feed GPS updates
 
@@ -234,6 +248,48 @@ Pass the integer `value` column to the `vehicleType:` initialiser argument.
 
 ---
 
+## Voice Cues & Priority
+
+The engine can emit several voice cues on a single GPS tick (e.g. a "speeding" warning plus an upcoming camera). Each clip delivered to `onVoice(wav, trigger, priority)` carries two integers. The engine orders the clips by **priority descending**, and within the same priority by **travel order** (nearest alert first). Because the iOS SDK never plays audio itself, the host decides whether to play / queue / skip — e.g. favour `2` (speeding) and drop `0` ("current") when the playback queue is congested.
+
+### `priority`
+
+| `priority` | Tier | Behaviour |
+|---|---|---|
+| `2` | Speeding | Most urgent — *"bạn đang vượt quá giới hạn tốc độ"* (you are exceeding the speed limit). |
+| `1` | Normal | Approaching speed limit, cameras, tolls, signs (travel order). |
+| `0` | Current | *"tốc độ giới hạn hiện tại …"* (current speed limit …) — stale-prone; drop first under congestion. |
+
+### `trigger`
+
+Identifies which cue fired, so the host can filter or substitute its own audio. Spoken phrases are Vietnamese.
+
+| `trigger` | Name | Spoken phrase |
+|---|---|---|
+| `0` | None | — |
+| `1` | Current speed limit | "tốc độ giới hạn hiện tại X km/h" |
+| `2` | Approaching speed limit | "tốc độ giới hạn tiếp theo X km/h" |
+| `3` | Camera | "phía trước có camera theo dõi tốc độ" |
+| `4` | Toll booth | "phía trước có trạm thu phí" |
+| `5` | Speeding | "bạn đang vượt quá giới hạn tốc độ" |
+| `6` | Enforcement camera | "phía trước có camera phạt nguội" |
+| `7` | Red-light camera | "phía trước có camera giám sát" |
+| `8` | AI camera | "phía trước có camera giám sát" |
+| `9` | No left turn | "phía trước có biển báo cấm rẽ trái" |
+| `10` | No right turn | "phía trước có biển báo cấm rẽ phải" |
+| `11` | No U-turn | "phía trước có biển báo cấm quay đầu" |
+| `12` | No overtaking | "phía trước có biển báo cấm vượt" |
+| `13` | No-overtaking end | "kết thúc đoạn cấm vượt" |
+| `14` | No parking | "phía trước có biển báo cấm đỗ xe" |
+| `15` | No straight | "phía trước có biển báo cấm đi thẳng" |
+| `16` | Built-up area start | "phía trước có biển báo khu dân cư" |
+| `17` | Built-up area end | "phía trước có biển báo kết thúc khu dân cư" |
+| `18` | Rest station | "phía trước có trạm dừng nghỉ" |
+
+> **Note:** AI cameras (`trigger 8`) share the *"camera giám sát"* phrase with red-light cameras (`trigger 7`) — they remain distinct triggers but use the same audio clip.
+
+---
+
 ## Error Codes (`onResult`)
 
 | Code | Meaning |
@@ -271,6 +327,9 @@ All public methods are safe to call from the main thread. The callbacks always a
 - **Wrong sign shown on the wrong road:** pass map-matched coordinates instead of raw GPS (see step 3 note).
 
 ---
+
+## Demo
+Check demo app on [Github](https://github.com/mapzone-global/mapzone-speed-alert-app-ios).
 
 ## License
 

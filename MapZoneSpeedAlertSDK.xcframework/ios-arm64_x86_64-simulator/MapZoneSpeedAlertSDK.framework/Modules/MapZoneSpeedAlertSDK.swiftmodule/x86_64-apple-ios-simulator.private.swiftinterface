@@ -14,7 +14,7 @@ import _SwiftConcurrencyShims
   @objc public var onReady: ((Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public var onResult: ((Swift.Bool, Swift.Int, Swift.String) -> Swift.Void)?
   public var onBitmap: ((UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, Foundation.Data?) -> Swift.Void)?
-  public var onVoice: ((Foundation.Data) -> Swift.Void)?
+  public var onVoice: ((Foundation.Data, Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public init(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, bundleId: Swift.String, vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Int)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double, speedKmh: Swift.Double, bearingDeg: Swift.Double)
@@ -29,6 +29,31 @@ import _SwiftConcurrencyShims
   }
   public func flushLog()
   @objc deinit
+}
+@objc public enum VehicleType : Swift.Int {
+  case car = 1
+  case motorcycle = 2
+  case truck = 3
+  case coach = 4
+  case bus = 5
+  case taxi = 6
+  case bicycle = 7
+  case pedestrian = 8
+  case emergency = 9
+  public static func fromValue(_ value: Swift.Int) -> MapZoneSpeedAlertSDK.VehicleType
+  public var description: Swift.String {
+    get
+  }
+  public var displayName: Swift.String {
+    get
+  }
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
 }
 @_inheritsConvenienceInitializers @objc public class EnhancedLocationManager : ObjectiveC.NSObject {
   @objc public var onLocationUpdate: ((_LocationEssentials.CLLocation, Swift.String, Swift.String) -> Swift.Void)?
@@ -59,3 +84,6 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   @available(iOS 14.0, *)
   @objc dynamic public func locationManagerDidChangeAuthorization(_ manager: CoreLocation.CLLocationManager)
 }
+extension MapZoneSpeedAlertSDK.VehicleType : Swift.Equatable {}
+extension MapZoneSpeedAlertSDK.VehicleType : Swift.Hashable {}
+extension MapZoneSpeedAlertSDK.VehicleType : Swift.RawRepresentable {}

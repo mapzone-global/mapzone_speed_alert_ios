@@ -334,6 +334,21 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
+/// Vehicle type for MapZone Speed Alert SDK.
+/// Values aligned with Zone Network v4 backend enum
+/// (<code>drivingalert/api/v1/Zone/network?vehicleType=...</code>).
+typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
+  VehicleTypeCar = 1,
+  VehicleTypeMotorcycle = 2,
+  VehicleTypeTruck = 3,
+  VehicleTypeCoach = 4,
+  VehicleTypeBus = 5,
+  VehicleTypeTaxi = 6,
+  VehicleTypeBicycle = 7,
+  VehicleTypePedestrian = 8,
+  VehicleTypeEmergency = 9,
+};
+
 /// Entry point for the MapZone Speed Alert engine on iOS.
 /// Holds the configuration for a single vehicle profile and forwards each
 /// GPS update to the native engine. The engine performs zone loading,

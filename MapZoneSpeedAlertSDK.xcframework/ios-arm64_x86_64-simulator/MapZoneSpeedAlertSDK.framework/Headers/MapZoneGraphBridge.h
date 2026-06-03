@@ -26,10 +26,29 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) double    snapLat;
 @property (nonatomic, assign) double    snapLng;
 @property (nonatomic, assign) BOOL      snapValid;
-/** Voice trigger: 0=none, 1=speed_changed, 2=approaching_speed, 3=camera, 4=toll */
+/**
+ * Primary voice trigger this tick (back-compat). See VoiceTrigger enum
+ * values 1..18 in graph_engine_v2.hpp. Use `voiceTriggers` for the full
+ * list when multiple variants fire on the same tick.
+ */
 @property (nonatomic, assign) NSInteger voiceTrigger;
 /** Speed value to announce (for trigger 1 and 2). */
 @property (nonatomic, assign) NSInteger voiceSpeedValue;
+/**
+ * Full list of voice triggers fired this tick, in fire order. Each
+ * element is `NSInteger` wrapped in `NSNumber`. Empty when no voice
+ * fires. Includes the primary trigger as the first element.
+ */
+@property (nonatomic, copy) NSArray<NSNumber *> *voiceTriggers;
+/**
+ * Priority for each entry in `voiceTriggers` (same index/order). Each element
+ * is an `NSInteger` wrapped in `NSNumber`:
+ *   0 = "hiện tại"/current (lowest — skipped first when the queue is congested),
+ *   1 = normal (approaching/camera/sign),
+ *   2 = speeding (most urgent).
+ * The engine already ordered the events (priority desc, then nearest first).
+ */
+@property (nonatomic, copy) NSArray<NSNumber *> *voicePriorities;
 @end
 
 // ============================================================
@@ -74,15 +93,19 @@ NS_ASSUME_NONNULL_BEGIN
 /** Alert ID. */
 @property (nonatomic, assign) NSInteger id;
 /**
- * Alert category:
- *   0 = speed sign
- *   1 = toll station
- *   2 = camera
+ * Alert category top-nibble (`(category >> 12) & 0xF`), per v4 spec:
+ *   1 = Sign
+ *   2 = Camera
+ *   3 = TrafficLight (reserved, no data yet)
+ *   4 = TollPlaza
  *  99 = synthetic speed-limit-change event (isSpeedChange=YES)
  */
 @property (nonatomic, assign) NSInteger alertType;
-/** Sub-type (e.g. 167 = speed-limit sign). */
-@property (nonatomic, assign) NSInteger type;
+/**
+ * Variant (low 12 bits of category). Concrete values listed in the
+ * v4 spec (e.g. Sign+0x001=SpeedLimit, Camera+0x003=RedLightCamera).
+ */
+@property (nonatomic, assign) NSInteger variant;
 /** Speed value in km/h (for speed signs and speed-change events). */
 @property (nonatomic, assign) NSInteger speed;
 /** Distance ahead from current position (meters). */
@@ -317,14 +340,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Generate voice WAV for current speed limit "X km/h" (number only, no prefix).
  * Returns nil for 0 or unknown speeds.
- * Each call produces byte-different WAV (anti-matching noise).
+ * Returns a freshly generated WAV on each call (do not cache the bytes).
  */
 - (nullable NSData *)generateCurrentSpeedLimitVoice:(NSInteger)speedKmh;
 
 /**
  * Generate voice WAV for "tốc độ giới hạn tiếp theo X km/h".
  * Returns nil for 0 or unknown speeds.
- * Each call produces byte-different WAV (anti-matching noise).
+ * Returns a freshly generated WAV on each call (do not cache the bytes).
  */
 - (nullable NSData *)generateNextSpeedLimitVoice:(NSInteger)speedKmh;
 
@@ -339,6 +362,33 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** "bạn đang vượt quá giới hạn tốc độ" voice WAV. */
 - (NSData *)generateSpeedingVoice;
+
+// ── v4 variant voice clips ─────────────────────────────────────────────
+
+/** Red-light camera (category 0x2003) — "phía trước có camera giám sát". */
+- (NSData *)generateRedLightCameraVoice;
+/** AI camera (category 0x2004) — "phía trước có camera AI giám sát". */
+- (NSData *)generateAICameraVoice;
+/** Rest station (sign 0x100E) — "phía trước có trạm dừng nghỉ". */
+- (NSData *)generateRestStationVoice;
+/** No-left-turn (sign 0x1006, 0x1008) — "phía trước có biển báo cấm rẽ trái". */
+- (NSData *)generateNoLeftTurnVoice;
+/** No-right-turn (sign 0x1007, 0x1009) — "phía trước có biển báo cấm rẽ phải". */
+- (NSData *)generateNoRightTurnVoice;
+/** No U-turn (sign 0x100A, 0x100B) — "phía trước có biển báo cấm quay đầu". */
+- (NSData *)generateNoUTurnVoice;
+/** No overtaking (sign 0x1004) — "phía trước có biển báo cấm vượt". */
+- (NSData *)generateNoOvertakingVoice;
+/** End of no-overtaking zone (sign 0x1005) — "kết thúc đoạn cấm vượt". */
+- (NSData *)generateNoOvertakingEndVoice;
+/** No parking (sign 0x100D) — "phía trước có biển báo cấm dừng đỗ". */
+- (NSData *)generateNoParkingVoice;
+/** No straight ahead (sign 0x100C) — "phía trước có biển báo cấm đi thẳng". */
+- (NSData *)generateNoStraightVoice;
+/** Build-up area start (sign 0x1002) — "phía trước có biển báo khu dân cư". */
+- (NSData *)generateBuildUpAreaStartVoice;
+/** Build-up area end (sign 0x1003) — "kết thúc khu dân cư". */
+- (NSData *)generateBuildUpAreaEndVoice;
 
 // -------------------------------------------------------
 //  Zone loading — C++ owns HTTP + decode + parse
