@@ -1,138 +1,201 @@
-# MapZoneSpeedAlertSDK – iOS Integration (Graph Engine V2)
+# MapZoneSpeedAlertSDK – iOS Integration
 
 This SDK is provided only for Vietmap MAPs API enterprise customers. Contact your Vietmap account manager for access or [Vietmap Solutions](https://zalo.me/3189066936017422854) Zalo OA if you are interested in becoming a customer.
 
-
-**This version is under development and will deprecate soon. For the stable version, please switch to the latest version branch or contact Vietmap support.**
+---
 
 ## Requirements
 
 | | Minimum |
 |---|---|
-| iOS | 12.0+ |
-| Xcode | 14.0+ |
-| Swift | 5.0+ |
+| iOS deployment target | 12.0 |
+| Xcode | 14.0 |
+| Swift | 5.0 |
+| Device | iPhone 6s or newer (arm64) |
+| Network | HTTPS access to `*.map.zone` |
+| Location | GPS hardware required (Wi-Fi-only iPads not supported) |
+
+> **Note:** The XCFramework ships `arm64` slices for device and `arm64`+`x86_64` for simulator. Apple Silicon Macs run the simulator slice natively.
 
 ---
 
 ## Installation
 
+### CocoaPods (recommended)
+
+Add to your `Podfile`:
+
 ```ruby
-# Podfile
-pod 'MapZoneSpeedAlertSDK'
+platform :ios, '12.0'
+use_frameworks!
+
+target 'YourApp' do
+  pod 'MapZoneSpeedAlertSDK', '~> <lasted-version>'
+end
 ```
+
+Then install:
 
 ```bash
 pod install
 ```
 
+> **Note:** The pod vendors a prebuilt XCFramework — no source compilation, no NDK / Swift toolchain pinning. Open the generated `.xcworkspace` from now on.
+
 ---
 
-## Setup – Info.plist
+## Permissions — `Info.plist`
+
+Add the following keys. Strings are shown to the user in the system permission prompt — keep them short and explain *why* you need each.
 
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
-<string>Used for real-time speed alerts.</string>
+<string>Used for real-time speed limit and camera alerts while you drive.</string>
 
 <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>Used for speed alerts in the background.</string>
+<string>Used for speed alerts when the app is in the background.</string>
 
 <key>UIBackgroundModes</key>
 <array>
     <string>location</string>
+    <string>audio</string>
 </array>
+```
+
+> **Note:** `audio` background mode is only required if you need voice cues to keep playing when the screen is locked. Drop it if your app foregrounds for navigation.
+
+Request authorization before instantiating the engine:
+
+```swift
+import CoreLocation
+
+let locationManager = CLLocationManager()
+locationManager.requestWhenInUseAuthorization()
+// Switch to requestAlwaysAuthorization() if you need background updates.
 ```
 
 ---
 
-## Quick Integration — `ZoneNetworkManagerV2`
+## Quick Integration — `ZoneNetworkManager`
 
-`ZoneNetworkManagerV2` is the recommended high-level entry point.
-It handles zone data fetching, graph loading, GPS pipeline, bitmaps, and voice in one object.
+`ZoneNetworkManager` is the only public entry point. It owns the engine and serialises all GPS / network work on an internal background queue — the public API is safe to call from the main thread.
 
 ### 1. Create and configure
 
 ```swift
 import MapZoneSpeedAlertSDK
 
-let zoneManager = ZoneNetworkManagerV2(
-    baseUrl:     "https://dev.fastmap.vn/drivingalert",
-    vehicleType: 1,      // see Vehicle Types table below
-    seats:       4,
-    weights:     1500
+let zoneManager = ZoneNetworkManager(
+    baseUrl:     "https://driving.map.zone",         // endpoint
+    apiKeyId:    "<your-api-key-id>",                // issued by Vietmap
+    apiKey:      "<your-api-key>",                   // issued by Vietmap
+    bundleId:    Bundle.main.bundleIdentifier ?? "",
+    vehicleId:   "<your-vehicle-id>",                // issued by Vietmap
+    vehicleType: 1,        // see Vehicle Types table below
+    seats:       4,        // used by the server to filter applicable alerts
+    weights:     1500      // gross weight in kg
 )
 ```
+
+> **Note:** Treat `apiKey` as a credential. Do not log it, embed it in a public repo, or expose it in user-facing UI. The constructor throws an Objective-C exception with name `"InvalidArgument"` if `baseUrl` does not start with `https://`.
 
 ### 2. Register callbacks
 
+All four callbacks fire on the main thread. Wire only the ones you need.
+
 ```swift
-// Fires once after zone data loads (linkCount, alertCount)
+// (a) Engine ready — fires after each successful zone load.
 zoneManager.onReady = { linkCount, alertCount in
-    print("Graph ready: \(linkCount) links, \(alertCount) alerts")
+    print("ready: \(linkCount) links, \(alertCount) alerts")
 }
 
-// Fires on every GPS frame that produces a sign update
-zoneManager.onBitmap = {
-    currentSignImage, speedStatus,
-    nextSignImage,    nextDistMeters,
-    cameraImage,      cameraDistMeters,
-    tollImage,        tollDistMeters,
-    voiceWavData in
+// (b) Network result — surfaces server errors. errorCode == 0 means success.
+zoneManager.onResult = { success, errorCode, errorMessage in
+    if !success && errorCode != 0 {
+        print("error code=\(errorCode): \(errorMessage)")
+    }
+}
 
-    // --- Current speed limit sign ---
-    self.speedSignView.image = currentSignImage
+// (c) Per-tick bitmaps + first voice clip — the core driver of your UI.
+zoneManager.onBitmap = { currentImage, speedStatus,
+                        nextImage,   nextDistMeters,
+                        cameraImage, cameraDistMeters,
+                        tollImage,   tollDistMeters,
+                        voiceWavData in
 
-    // --- Overspeed indicator ---
-    // speedStatus: 0 = safe, 1 = near limit, 2 = over limit
+    // Current speed-limit sign (nil = matcher has no link under GPS).
+    self.currentSpeedSign.image = currentImage
+
+    // Overspeed indicator: 0 = safe, 1 = approaching limit, 2 = over limit.
     switch speedStatus {
-    case 1:  self.statusBar.backgroundColor = .systemYellow
-    case 2:  self.statusBar.backgroundColor = .systemRed
-    default: self.statusBar.backgroundColor = .clear
+    case 1:  self.statusBar.tintColor = .systemOrange
+    case 2:  self.statusBar.tintColor = .systemRed
+    default: self.statusBar.tintColor = .systemGreen
     }
 
-    // --- Upcoming sign ---
-    self.nextSignView.image = nextSignImage
-    self.nextDistLabel.text = nextSignImage != nil ? "\(nextDistMeters)m" : ""
+    // Upcoming sign / camera / toll. Containers should be hidden when distance == 0.
+    self.nextSignView.image  = nextImage
+    self.nextSignLabel.text  = nextImage  != nil ? "\(nextDistMeters)m"   : ""
+    self.cameraView.image    = cameraImage
+    self.cameraLabel.text    = cameraImage != nil ? "\(cameraDistMeters)m" : ""
+    self.tollView.image      = tollImage
+    self.tollLabel.text      = tollImage   != nil ? "\(tollDistMeters)m"   : ""
 
-    // --- Speed camera ---
-    self.cameraView.image = cameraImage
-    self.cameraLabel.text = cameraImage != nil ? "\(cameraDistMeters)m" : ""
-
-    // --- Toll gate ---
-    self.tollView.image = tollImage
-    self.tollLabel.text = tollImage != nil ? "\(tollDistMeters)m" : ""
-
-    // --- Voice (WAV PCM 16-bit, 22 050 Hz mono) ---
+    // First voice clip of the tick (WAV PCM 16-bit LE, mono, 22050 Hz).
+    // NOTE: voiceWavData is the FIRST clip only, and is non-nil ONLY when
+    // `onVoice` is not set. Once `onVoice` is wired, every clip (including the
+    // first) is delivered through `onVoice` and voiceWavData is always nil —
+    // so there is no double playback.
     if let wav = voiceWavData {
-        self.playWav(wav)
+        self.enqueueVoice(wav, priority: 1)
     }
 }
 
-// Additional queued voice clips (e.g. when two events fire close together)
-zoneManager.onVoice = { wav in
-    self.playWav(wav)
+// (d) Voice — receives EVERY clip of the tick, each tagged with its trigger
+// and priority. The engine already orders them (priority desc, then nearest
+// first), so arrival order is the order you should speak them in.
+//   trigger : alert type — see the Voice Cues & Priority table below
+//   priority: 0 = "current" (lowest, drop first when congested)
+//             1 = normal (approaching / camera / sign)
+//             2 = speeding (most urgent)
+zoneManager.onVoice = { wav, trigger, priority in
+    self.enqueueVoice(wav, priority: priority)
 }
 ```
+
+> **Important — iOS has no built-in voice player.** Unlike the Android SDK, the iOS engine never plays audio for you. Every WAV delivered via `onBitmap` (`voiceWavData`) or `onVoice` must be handled by the host app, or the cue is dropped. A minimal priority-aware sequential player — it inserts by priority (highest first) and keeps arrival order (the engine's travel order) within the same priority, so urgent cues like "speeding" are spoken before stale "current speed limit" ones:
+>
+> ```swift
+> import AVFoundation
+>
+> private var voiceQueue: [(data: Data, priority: Int)] = []
+> private var audioPlayer: AVAudioPlayer?
+> private var playing = false
+>
+> func enqueueVoice(_ data: Data, priority: Int) {
+>     // Insert before the first clip of strictly lower priority → stable within a tier.
+>     let idx = voiceQueue.firstIndex { $0.priority < priority } ?? voiceQueue.count
+>     voiceQueue.insert((data, priority), at: idx)
+>     if !playing { playNext() }
+> }
+>
+> private func playNext() {
+>     guard !voiceQueue.isEmpty else { playing = false; return }
+>     let url = URL(fileURLWithPath: NSTemporaryDirectory())
+>         .appendingPathComponent("mzv_\(Int.random(in: 1000...9999)).wav")
+>     try? voiceQueue.removeFirst().data.write(to: url)
+>     audioPlayer = try? AVAudioPlayer(contentsOf: url)
+>     audioPlayer?.delegate = self          // implement audioPlayerDidFinishPlaying -> playNext()
+>     audioPlayer?.play()
+>     playing = true
+> }
+> ```
+>
+> The single-clip `onBitmap` path (legacy hosts that never wire `onVoice`) maps cleanly onto the same queue with `priority: 1`.
 
 ### 3. Feed GPS updates
 
-```swift
-// Step A — update zone cache (call on a background queue; blocks on HTTP if zone changed)
-DispatchQueue.global(qos: .utility).async {
-    zoneManager.updateLocation(lat: lat, lng: lng)
-}
-
-// Step B — process GPS frame (call on any queue; delivers callbacks on main thread)
-zoneManager.processGps(
-    lat:      lat,
-    lng:      lng,
-    bearing:  heading,   // degrees, 0–360, clockwise from north
-    speedKmh: speed,     // km/h
-    accuracy: accuracy   // meters
-)
-```
-
-Typical call site inside a `CLLocationManagerDelegate`:
+Call both APIs on every GPS frame. The engine throttles HTTP fetches internally — calling at 1 Hz when the vehicle hasn't moved costs nothing.
 
 ```swift
 func locationManager(_ manager: CLLocationManager,
@@ -141,94 +204,133 @@ func locationManager(_ manager: CLLocationManager,
 
     let lat      = loc.coordinate.latitude
     let lng      = loc.coordinate.longitude
-    let bearing  = loc.course >= 0 ? loc.course : 0
-    let speedKmh = max(loc.speed, 0) * 3.6
+    let bearing  = loc.course >= 0 ? loc.course : 0        // -1 when stationary
+    let speedKmh = max(loc.speed, 0) * 3.6                 // CoreLocation gives m/s
     let accuracy = loc.horizontalAccuracy
 
-    // Zone cache check (background)
-    DispatchQueue.global(qos: .utility).async {
-        self.zoneManager.updateLocation(lat: lat, lng: lng)
-    }
+    // (a) Refresh zone cache. Returns immediately; HTTP happens on a background queue.
+    zoneManager.updateLocation(lat: lat, lng: lng,
+                               speedKmh: speedKmh, bearingDeg: bearing)
 
-    // GPS pipeline (immediate)
+    // (b) Drive the per-tick UI: bitmaps, speed status, voice cues.
     zoneManager.processGps(lat: lat, lng: lng, bearing: bearing,
                            speedKmh: speedKmh, accuracy: accuracy)
 }
 ```
 
-### 4. Reset (e.g. on new route or app resume)
+> **Note:** Pass *snapped-to-route* coordinates here if your app already runs map-matched navigation — raw CoreLocation samples can be 10-20 m off the road centre even with good `horizontalAccuracy`, which causes the matcher to pick the wrong link.
+
+### 4. Reset
 
 ```swift
-zoneManager.reset()
+zoneManager.reset()    // clears loaded zone data; next updateLocation() refetches
 ```
+
+Call this when the driver swaps `vehicleType` / `seats` / `weights`, or at the end of a navigation session if you want to free engine memory immediately.
 
 ---
 
 ## Vehicle Types
 
-| Value | Type |
+Pass the integer `value` column to the `vehicleType:` initialiser argument.
+
+| Value | Type | Notes |
+|---|---|---|
+| 1 | Car | |
+| 2 | Motorcycle | |
+| 3 | Truck | Supported for speed alerts |
+| 4 | Coach | |
+| 5 | Bus | |
+| 6 | Taxi | |
+| 7 | Bicycle | |
+| 8 | Pedestrian | |
+| 9 | Emergency | |
+
+---
+
+## Voice Cues & Priority
+
+The engine can emit several voice cues on a single GPS tick (e.g. a "speeding" warning plus an upcoming camera). Each clip delivered to `onVoice(wav, trigger, priority)` carries two integers. The engine orders the clips by **priority descending**, and within the same priority by **travel order** (nearest alert first). Because the iOS SDK never plays audio itself, the host decides whether to play / queue / skip — e.g. favour `2` (speeding) and drop `0` ("current") when the playback queue is congested.
+
+### `priority`
+
+| `priority` | Tier | Behaviour |
+|---|---|---|
+| `2` | Speeding | Most urgent — *"bạn đang vượt quá giới hạn tốc độ"* (you are exceeding the speed limit). |
+| `1` | Normal | Approaching speed limit, cameras, tolls, signs (travel order). |
+| `0` | Current | *"tốc độ giới hạn hiện tại …"* (current speed limit …) — stale-prone; drop first under congestion. |
+
+### `trigger`
+
+Identifies which cue fired, so the host can filter or substitute its own audio. Spoken phrases are Vietnamese.
+
+| `trigger` | Name | Spoken phrase |
+|---|---|---|
+| `0` | None | — |
+| `1` | Current speed limit | "tốc độ giới hạn hiện tại X km/h" |
+| `2` | Approaching speed limit | "tốc độ giới hạn tiếp theo X km/h" |
+| `3` | Camera | "phía trước có camera theo dõi tốc độ" |
+| `4` | Toll booth | "phía trước có trạm thu phí" |
+| `5` | Speeding | "bạn đang vượt quá giới hạn tốc độ" |
+| `6` | Enforcement camera | "phía trước có camera phạt nguội" |
+| `7` | Red-light camera | "phía trước có camera giám sát" |
+| `8` | AI camera | "phía trước có camera giám sát" |
+| `9` | No left turn | "phía trước có biển báo cấm rẽ trái" |
+| `10` | No right turn | "phía trước có biển báo cấm rẽ phải" |
+| `11` | No U-turn | "phía trước có biển báo cấm quay đầu" |
+| `12` | No overtaking | "phía trước có biển báo cấm vượt" |
+| `13` | No-overtaking end | "kết thúc đoạn cấm vượt" |
+| `14` | No parking | "phía trước có biển báo cấm đỗ xe" |
+| `15` | No straight | "phía trước có biển báo cấm đi thẳng" |
+| `16` | Built-up area start | "phía trước có biển báo khu dân cư" |
+| `17` | Built-up area end | "phía trước có biển báo kết thúc khu dân cư" |
+| `18` | Rest station | "phía trước có trạm dừng nghỉ" |
+
+> **Note:** AI cameras (`trigger 8`) share the *"camera giám sát"* phrase with red-light cameras (`trigger 7`) — they remain distinct triggers but use the same audio clip.
+
+---
+
+## Error Codes (`onResult`)
+
+| Code | Meaning |
 |---|---|
-| 1 | Car |
-| 2 | Taxi |
-| 3 | Bus |
-| 4 | Coach |
-| 5 | Truck |
-| 6 | Trailer |
-| 7 | Bicycle |
-| 8 | Motorbike |
-| 9 | Pedestrian |
-| 10 | Semi-trailer |
+| `0` | Success (zone loaded) |
+| `1001` | Invalid parameter (check `vehicleId`, `seats`, `weights`) |
+| `2003` | Unauthorized — `apiKeyId` / `apiKey` / `bundleId` mismatch |
+| `3003` | Vehicle type not supported for this account |
+| negative values | Local SDK failure (network unreachable, parse error) |
 
+---
 
-Currently, we only support `vehicleType` 3, 5, 6, (truck and trailer) for speed alerts. If you want to use more types, consider using our [Vietmap Live](https://vietmap.vn/vietmap-live) application, which has a built-in speed alert feature.
+## Threading Model
 
-## BMP Decoding Helper
-
-iOS `UIImage(data:)` does not support BMP alpha. Use this helper:
-
-```swift
-func imageFromBmpData(_ data: Data) -> UIImage? {
-    guard data.count > 54,
-          data[0] == 0x42, data[1] == 0x4D else { return nil }   // "BM"
-
-    let pixelOffset = Int(data[10]) | (Int(data[11]) << 8)
-    let width       = Int(data[18]) | (Int(data[19]) << 8)
-    let height      = Int(data[22]) | (Int(data[23]) << 8)
-    guard width > 0, height > 0 else { return nil }
-
-    let rowBytes = width * 4
-    var rgba = [UInt8](repeating: 0, count: width * height * 4)
-
-    for row in 0..<height {
-        let srcRow  = height - 1 - row        // BMP is stored bottom-up
-        let srcBase = pixelOffset + srcRow * rowBytes
-        let dstBase = row * rowBytes
-        guard srcBase + rowBytes <= data.count else { continue }
-        for col in 0..<width {
-            let s = srcBase + col * 4
-            let d = dstBase + col * 4
-            rgba[d]   = data[s + 2]   // R  (BMP BGRA → RGBA)
-            rgba[d+1] = data[s + 1]   // G
-            rgba[d+2] = data[s]       // B
-            rgba[d+3] = data[s + 3]   // A
-        }
-    }
-
-    guard let provider = CGDataProvider(data: Data(rgba) as CFData),
-          let cgImage  = CGImage(
-              width:            width,
-              height:           height,
-              bitsPerComponent: 8,
-              bitsPerPixel:     32,
-              bytesPerRow:      rowBytes,
-              space:            CGColorSpaceCreateDeviceRGB(),
-              bitmapInfo:       CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
-              provider:         provider,
-              decode:           nil,
-              shouldInterpolate: true,
-              intent:           .defaultIntent
-          ) else { return nil }
-
-    return UIImage(cgImage: cgImage)
-}
 ```
+ Main thread ──► updateLocation / processGps
+                          │
+                          ▼
+              Internal serial DispatchQueue
+              (HTTP + matching + bitmap render)
+                          │
+                          ▼
+              Main thread ◄── onReady / onResult / onBitmap / onVoice
+```
+
+All public methods are safe to call from the main thread. The callbacks always arrive back on the main thread, so you can update UIKit directly without dispatching.
+
+---
+
+## Troubleshooting
+
+- **No bitmaps and `onReady` never fires:** check `onResult` — a non-zero `errorCode` tells you whether it is an auth issue (2003), a parameter issue (1001), or a network failure (negative code).
+- **Voice never plays:** verify your `AVAudioPlayer` queue logic — the SDK never plays audio on iOS (see the *Important* note in step 2).
+- **Bitmaps appear with a black background instead of transparency:** you are decoding the BMP via `UIImage(data:)`. The SDK already returns proper `UIImage` instances via `onBitmap` — don't re-decode the underlying bytes.
+- **Wrong sign shown on the wrong road:** pass map-matched coordinates instead of raw GPS (see step 3 note).
+
+---
+
+## Demo
+Check demo app on [Github](https://github.com/mapzone-global/mapzone-speed-alert-app-ios).
+
+## License
+
+Proprietary — MapZone Global. See `LICENSE` for terms.

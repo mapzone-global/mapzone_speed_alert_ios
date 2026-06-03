@@ -8,9 +8,9 @@
 		<data>
 		GR6MgCa07syRGIhqdbuSCXIDB9E=
 		</data>
-		<key>Headers/MapZoneGraphBridgeV2.h</key>
+		<key>Headers/MapZoneGraphBridge.h</key>
 		<data>
-		CsnWR6eMUumBCspHrofQ53Tyfwc=
+		L4O6+kETjV9VmB9GGgb06iNz8Uc=
 		</data>
 		<key>Headers/MapZoneSpeedAlertSDK-Public.h</key>
 		<data>
@@ -18,55 +18,55 @@
 		</data>
 		<key>Headers/MapZoneSpeedAlertSDK-Swift.h</key>
 		<data>
-		4MG9EGIyiQvJicup1rVVpabbQb0=
+		gp4qCp7GMpYVL3X/grs3AAJO6rA=
 		</data>
 		<key>Headers/MapZoneSpeedAlertSDK.h</key>
 		<data>
-		XxVK3ea1EO8ThN+OCUcOeFC/KkQ=
+		1YhyYQw4EVsvnocrUs5DQkbg8Mk=
 		</data>
 		<key>Info.plist</key>
 		<data>
-		L+HaSf5105fNwXwwpY8fWdEZnY4=
+		mXk4XYKK83G1zrvFx8gDSfibalQ=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<data>
-		DWnyyXO6ywdWOSYWZU7N+9sdCU8=
+		cmfcr+rDwTvdnOkJZHxNWSDA6uQ=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		Pr4BzKlMh+ewlz203kwJlfuScB4=
+		4Ndztl0Nb8+ly8PDIRoLUp4UQlI=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		4hACxZT8/rkTdq2qxVvjYkA8fhQ=
+		WPoBEJe7U042n+4kzY8TknJF1i0=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		Pr4BzKlMh+ewlz203kwJlfuScB4=
+		4Ndztl0Nb8+ly8PDIRoLUp4UQlI=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		jtCWjcYUU5udjqgDHCM+z8eALL4=
+		qsmyH5133g/3C76aLg2CGLFaMkw=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<data>
-		DWnyyXO6ywdWOSYWZU7N+9sdCU8=
+		cmfcr+rDwTvdnOkJZHxNWSDA6uQ=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<data>
-		iw42cuqeWpNDuV2eTQ9Ud66ixdw=
+		s1ou4OS9BYb4PdMV9WA5IrRtN4A=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<data>
-		OzMQjJEhG/6/vBq/vZ7OA4Fo+9I=
+		z8PkGW12qt5HJgFktd5OEF16PPI=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<data>
-		iw42cuqeWpNDuV2eTQ9Ud66ixdw=
+		s1ou4OS9BYb4PdMV9WA5IrRtN4A=
 		</data>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<data>
-		ipQt+kzK7AX8IRGoWJ1YMUs0E04=
+		PJyk7z6oC0SPeYaaX/PqiQ+BlzM=
 		</data>
 		<key>Modules/module.modulemap</key>
 		<data>
@@ -82,11 +82,11 @@
 			cVl0GxrHcsS4gfklcTyhvT1gGpG8kRxZ7e0rVpuJ2jQ=
 			</data>
 		</dict>
-		<key>Headers/MapZoneGraphBridgeV2.h</key>
+		<key>Headers/MapZoneGraphBridge.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			AVEP4GXsn0ujD7B+doTlm5ZYEZbJ/nQbiypT0Z0iK+8=
+			HaA25FKvmLEIR8LigxQKKjgCFiYo9OHuDblMYdcY/ow=
 			</data>
 		</dict>
 		<key>Headers/MapZoneSpeedAlertSDK-Public.h</key>
@@ -100,84 +100,84 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			W81zZwW2iEIs/O9FF3JXJlLWw+MKnaCLbS7jbxwe6Jk=
+			05r1Skp2ms4KMSnZI9IJHP/FGj+1q0TUbK5EyYKGU4U=
 			</data>
 		</dict>
 		<key>Headers/MapZoneSpeedAlertSDK.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			coYS2ntQj2VmWoa1976yiSzKIRWTNlC2obyavEtnDAc=
+			NMDIocD26P1a+oEZ9xRpiHgfS+Ihxm/6ieQwKtc9rcE=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eLhlu2zda5Tf2j/Aqq+vP6sa4nJja9QgQp9aIqchFd8=
+			DV0r1CryOp33wchSm4wk2BVY3ZGl1gfT2hIjkfB01WY=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Jx3/NKTyxDvf4mg4JFxTH4r04IMtutn8TmNtbLmuGw8=
+			jM5ZJnKQMyBXg7B0WtHLPaO7akBbS3mDMFOFhTwGNaI=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			XOdEVqe6fxPfCBk7kTgicbKlk96ka14gfH2AtUMgSL0=
+			Obkcl6M3SmSmiK+TgSqbM/MU9qgKiEm2IWMrP4tpAas=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			Jx3/NKTyxDvf4mg4JFxTH4r04IMtutn8TmNtbLmuGw8=
+			jM5ZJnKQMyBXg7B0WtHLPaO7akBbS3mDMFOFhTwGNaI=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/arm64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eojWt3fRlmKR0uNfb/CO7e6JVrzthwYsojGPMFsge/U=
+			/ndMcVHSBFHQRHsh8GYgkkO7URM+09rWw98vWgSTkxY=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.abi.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			eLhlu2zda5Tf2j/Aqq+vP6sa4nJja9QgQp9aIqchFd8=
+			DV0r1CryOp33wchSm4wk2BVY3ZGl1gfT2hIjkfB01WY=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.private.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			UPAHhtmEeg3ckX++YtI7GJgoUOkEM/unav+yHXnOTCo=
+			n6CJbSBIJZZFJb8RMXmyu/b3hVOANinqfAuG55SwJ5c=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftdoc</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			B3EqDy/BhIhVb8jm/nQRhsB8dm577wC3NQVW/sGDSdk=
+			bUktu3ptN1ajwu/h4VrSLH1fQ6nj7ap+PO3A8xPQFUE=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftinterface</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			UPAHhtmEeg3ckX++YtI7GJgoUOkEM/unav+yHXnOTCo=
+			n6CJbSBIJZZFJb8RMXmyu/b3hVOANinqfAuG55SwJ5c=
 			</data>
 		</dict>
 		<key>Modules/MapZoneSpeedAlertSDK.swiftmodule/x86_64-apple-ios-simulator.swiftmodule</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			k7NfnNTjGBAuYE8I+JX/nE4Q5hCyKbkE4FyOSy/Qay0=
+			CYh6l6oDMV0RHH5xqq3gYPP6pBsQ3MQ7AooUM5Ivi7Y=
 			</data>
 		</dict>
 		<key>Modules/module.modulemap</key>

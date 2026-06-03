@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "MapZoneSpeedAlertSDK"
-  spec.version      = "0.0.7"
+  spec.version      = "2.0.0"
   spec.summary      = "MapZone Speed Alert SDK – GPS tracking and real-time speed alert for iOS."
   spec.description  = <<-DESC
     MapZoneSpeedAlertSDK provides GPS tracking and speed alert functionality with a
@@ -8,15 +8,15 @@ Pod::Spec.new do |spec|
     toll booth detection, route progress tracking, and TTS announcements.
   DESC
 
-  spec.homepage     = "https://github.com/mapzone-global/mapzone_speed_alert_ios"
+  spec.homepage     = "https://github.com/mapzonejsc/mapzone-speed-alert-sdk"
   spec.license      = { :type => "MIT", :file => "LICENSE" }
-  spec.author       = { "Vietmap" => "support@vietmap.vn" }
+  spec.author       = { "MapZone" => "support@mapzone.vn" }
 
   spec.platform              = :ios, "12.0"
   spec.ios.deployment_target = "12.0"
   spec.swift_version         = "5.0"
 
-  # Tag format: ios-1.0.0 (separate from Android tags)
+  # Tag format: ios-2.0.0 (separate from Android tags)
   spec.source = {
     :git => "https://github.com/mapzone-global/mapzone_speed_alert_ios.git",
     :tag => "ios-#{spec.version}"
