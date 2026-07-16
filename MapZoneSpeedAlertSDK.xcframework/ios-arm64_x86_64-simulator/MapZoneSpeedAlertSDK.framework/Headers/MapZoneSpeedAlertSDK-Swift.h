@@ -349,6 +349,40 @@ typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeEmergency = 9,
 };
 
+/// Configurable voice-alert categories the host app can mute.
+/// Each case maps 1:1 to a native <code>VoiceTrigger</code> (see <code>graph_engine_v2.hpp</code>).
+/// Use with <code>ZoneNetworkManager/setMutedAlertTypes(_:)</code> to choose which
+/// alert voices are spoken and which are skipped. From Objective-C, call
+/// <code>ZoneNetworkManager/setMutedAlertTypeValues(_:)</code> instead and box these
+/// values in <code>NSNumber</code> — a <code>Set</code> of enums cannot cross the ObjC bridge.
+/// note:
+/// Speed-limit (“hiện tại” / “tiếp theo”) and speeding warnings are
+/// core safety cues and are always announced — they have no case here, and
+/// their on-screen sign always shows.
+/// Muting a camera or toll category also hides its on-screen icon together
+/// with its voice. The other sign categories (no-turn, no-parking, …)
+/// currently have no icon, so muting them only silences the voice.
+typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
+  VoiceAlertTypeSpeedCamera = 3,
+  VoiceAlertTypeToll = 4,
+  VoiceAlertTypeTrafficEnforcementCamera = 6,
+  VoiceAlertTypeRedLightCamera = 7,
+  VoiceAlertTypeAiCamera = 8,
+  VoiceAlertTypeNoLeftTurn = 9,
+  VoiceAlertTypeNoRightTurn = 10,
+  VoiceAlertTypeNoUTurn = 11,
+  VoiceAlertTypeNoOvertaking = 12,
+  VoiceAlertTypeNoOvertakingEnd = 13,
+  VoiceAlertTypeNoParking = 14,
+  VoiceAlertTypeNoStraight = 15,
+  VoiceAlertTypeBuildUpAreaStart = 16,
+  VoiceAlertTypeBuildUpAreaEnd = 17,
+  VoiceAlertTypeRestStation = 18,
+};
+
+@class UIImage;
+@class NSData;
+@class NSNumber;
 /// Entry point for the MapZone Speed Alert engine on iOS.
 /// Holds the configuration for a single vehicle profile and forwards each
 /// GPS update to the native engine. The engine performs zone loading,
@@ -405,6 +439,59 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///   </li>
 /// </ul>
 @property (nonatomic, copy) void (^ _Nullable onResult)(BOOL, NSInteger, NSString * _Nonnull);
+/// Per-tick bitmap update for the speed-sign panel. Delivered on the
+/// main thread after every GPS frame that produces new visuals.
+/// Parameters:
+/// <ul>
+///   <li>
+///     <code>currentImage</code>: the active speed-limit sign, or <code>nil</code> when the
+///     matcher has no link under the GPS point.
+///   </li>
+///   <li>
+///     <code>speedStatus</code>: <code>0</code> = within limit, <code>1</code> = approaching limit
+///     (~80–100%), <code>2</code> = exceeding limit. Drive the colour of your
+///     in-app speedometer from this.
+///   </li>
+///   <li>
+///     <code>nextImage</code> / <code>nextDistMeters</code>: preview of the next sign ahead
+///     plus distance in metres.
+///   </li>
+///   <li>
+///     <code>cameraImage</code> / <code>cameraDistMeters</code>: preview of an upcoming
+///     speed camera.
+///   </li>
+///   <li>
+///     <code>tollImage</code> / <code>tollDistMeters</code>: preview of an upcoming toll booth.
+///   </li>
+///   <li>
+///     <code>voiceWav</code>: optional 22050 Hz mono PCM WAV ready for
+///     <code>AVAudioPlayer</code>. <code>nil</code> means nothing to announce this tick.
+///   </li>
+/// </ul>
+/// <blockquote>
+/// Important: Unlike Android, the iOS SDK has <em>no built-in voice
+/// player</em>. The host app must always play <code>voiceWav</code> (and any
+/// clips delivered via <code>onVoice</code>) itself — clips delivered while
+/// no playback is wired will be silently dropped.
+///
+/// </blockquote>
+@property (nonatomic, copy) void (^ _Nullable onBitmap)(UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, NSData * _Nullable);
+/// Voice clips for this GPS tick, each tagged with its trigger and
+/// priority so the host can order/skip them. Parameters:
+/// <code>(wav, trigger, priority)</code> where <code>priority</code> is
+/// <code>0</code> = “hiện tại”/current (skip first when congested),
+/// <code>1</code> = normal (approaching/camera/sign), <code>2</code> = speeding.
+/// When this closure is set, <em>all</em> clips (including the first) are
+/// delivered here and <code>onBitmap</code>’s <code>voiceWav</code> is <code>nil</code> — so there is no
+/// double playback. When it is <code>nil</code>, the first clip falls back to
+/// <code>onBitmap</code>’s <code>voiceWav</code> for legacy hosts.
+/// <blockquote>
+/// Important: The iOS SDK never plays voice automatically. If this
+/// closure is <code>nil</code>, only the first clip (via <code>onBitmap</code>) is offered —
+/// the host app is the only voice player.
+///
+/// </blockquote>
+@property (nonatomic, copy) void (^ _Nullable onVoice)(NSData * _Nonnull, NSInteger, NSInteger);
 /// Create a manager for the authenticated profile.
 /// note:
 /// Throws an Objective-C exception with name
@@ -481,6 +568,44 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// navigation session and you want to free the engine’s memory. The
 /// next <code>updateLocation</code> call will trigger a fresh fetch.
 - (void)reset;
+/// Objective-C entry point for <code>setMutedAlertTypes(_:)</code>.
+/// <code>Set<VoiceAlertType></code> is not representable in Objective-C, so ObjC
+/// hosts pass the raw <code>VoiceAlertType</code> values boxed in <code>NSNumber</code>:
+/// \code
+/// [manager setMutedAlertTypeValues:@[@(VoiceAlertTypeSpeedCamera),
+///                                    @(VoiceAlertTypeToll)]];
+///
+/// \endcodeSemantics are identical to <code>setMutedAlertTypes(_:)</code> — see it for the
+/// mute rules. Values matching no <code>VoiceAlertType</code> case are ignored rather
+/// than raising, so a host built against a newer enum degrades quietly.
+/// \param rawValues categories to suppress; empty re-enables all.
+///
+- (void)setMutedAlertTypeValues:(NSArray<NSNumber *> * _Nonnull)rawValues;
+/// Begin appending native logs to <code>path</code>. Pass <code>nil</code> to disable file
+/// logging. Useful for field tests where the Xcode console is
+/// unavailable; pair with <code>flushLog()</code> before sharing the file.
+/// <blockquote>
+/// Important: <em>Debug builds only.</em> The XCFramework published to
+/// integrators is built in Release configuration, which compiles
+/// every native log call site out of the binary — there is
+/// nothing for the file sink to capture. In a release build this
+/// method is a no-op that returns <code>false</code> without creating any
+/// file, so callers can detect the disabled-in-production state
+/// instead of finding an empty file on disk and assuming the SDK
+/// is broken.
+///
+/// </blockquote>
+///
+/// returns:
+/// <code>true</code> when the file was successfully opened for
+/// appending. Always <code>false</code> on release builds.
+- (BOOL)setLogFilePath:(NSString * _Nullable)path;
+/// Current native log file path, or empty string when file logging
+/// is off (including all release builds — see <code>setLogFilePath</code>).
+@property (nonatomic, readonly, copy) NSString * _Nonnull logFilePath;
+/// Flush pending bytes to disk before sharing the log file. No-op
+/// on release builds (see <code>setLogFilePath</code>).
+- (void)flushLog;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
@@ -844,6 +969,40 @@ typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeEmergency = 9,
 };
 
+/// Configurable voice-alert categories the host app can mute.
+/// Each case maps 1:1 to a native <code>VoiceTrigger</code> (see <code>graph_engine_v2.hpp</code>).
+/// Use with <code>ZoneNetworkManager/setMutedAlertTypes(_:)</code> to choose which
+/// alert voices are spoken and which are skipped. From Objective-C, call
+/// <code>ZoneNetworkManager/setMutedAlertTypeValues(_:)</code> instead and box these
+/// values in <code>NSNumber</code> — a <code>Set</code> of enums cannot cross the ObjC bridge.
+/// note:
+/// Speed-limit (“hiện tại” / “tiếp theo”) and speeding warnings are
+/// core safety cues and are always announced — they have no case here, and
+/// their on-screen sign always shows.
+/// Muting a camera or toll category also hides its on-screen icon together
+/// with its voice. The other sign categories (no-turn, no-parking, …)
+/// currently have no icon, so muting them only silences the voice.
+typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
+  VoiceAlertTypeSpeedCamera = 3,
+  VoiceAlertTypeToll = 4,
+  VoiceAlertTypeTrafficEnforcementCamera = 6,
+  VoiceAlertTypeRedLightCamera = 7,
+  VoiceAlertTypeAiCamera = 8,
+  VoiceAlertTypeNoLeftTurn = 9,
+  VoiceAlertTypeNoRightTurn = 10,
+  VoiceAlertTypeNoUTurn = 11,
+  VoiceAlertTypeNoOvertaking = 12,
+  VoiceAlertTypeNoOvertakingEnd = 13,
+  VoiceAlertTypeNoParking = 14,
+  VoiceAlertTypeNoStraight = 15,
+  VoiceAlertTypeBuildUpAreaStart = 16,
+  VoiceAlertTypeBuildUpAreaEnd = 17,
+  VoiceAlertTypeRestStation = 18,
+};
+
+@class UIImage;
+@class NSData;
+@class NSNumber;
 /// Entry point for the MapZone Speed Alert engine on iOS.
 /// Holds the configuration for a single vehicle profile and forwards each
 /// GPS update to the native engine. The engine performs zone loading,
@@ -900,6 +1059,59 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///   </li>
 /// </ul>
 @property (nonatomic, copy) void (^ _Nullable onResult)(BOOL, NSInteger, NSString * _Nonnull);
+/// Per-tick bitmap update for the speed-sign panel. Delivered on the
+/// main thread after every GPS frame that produces new visuals.
+/// Parameters:
+/// <ul>
+///   <li>
+///     <code>currentImage</code>: the active speed-limit sign, or <code>nil</code> when the
+///     matcher has no link under the GPS point.
+///   </li>
+///   <li>
+///     <code>speedStatus</code>: <code>0</code> = within limit, <code>1</code> = approaching limit
+///     (~80–100%), <code>2</code> = exceeding limit. Drive the colour of your
+///     in-app speedometer from this.
+///   </li>
+///   <li>
+///     <code>nextImage</code> / <code>nextDistMeters</code>: preview of the next sign ahead
+///     plus distance in metres.
+///   </li>
+///   <li>
+///     <code>cameraImage</code> / <code>cameraDistMeters</code>: preview of an upcoming
+///     speed camera.
+///   </li>
+///   <li>
+///     <code>tollImage</code> / <code>tollDistMeters</code>: preview of an upcoming toll booth.
+///   </li>
+///   <li>
+///     <code>voiceWav</code>: optional 22050 Hz mono PCM WAV ready for
+///     <code>AVAudioPlayer</code>. <code>nil</code> means nothing to announce this tick.
+///   </li>
+/// </ul>
+/// <blockquote>
+/// Important: Unlike Android, the iOS SDK has <em>no built-in voice
+/// player</em>. The host app must always play <code>voiceWav</code> (and any
+/// clips delivered via <code>onVoice</code>) itself — clips delivered while
+/// no playback is wired will be silently dropped.
+///
+/// </blockquote>
+@property (nonatomic, copy) void (^ _Nullable onBitmap)(UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, UIImage * _Nullable, NSInteger, NSData * _Nullable);
+/// Voice clips for this GPS tick, each tagged with its trigger and
+/// priority so the host can order/skip them. Parameters:
+/// <code>(wav, trigger, priority)</code> where <code>priority</code> is
+/// <code>0</code> = “hiện tại”/current (skip first when congested),
+/// <code>1</code> = normal (approaching/camera/sign), <code>2</code> = speeding.
+/// When this closure is set, <em>all</em> clips (including the first) are
+/// delivered here and <code>onBitmap</code>’s <code>voiceWav</code> is <code>nil</code> — so there is no
+/// double playback. When it is <code>nil</code>, the first clip falls back to
+/// <code>onBitmap</code>’s <code>voiceWav</code> for legacy hosts.
+/// <blockquote>
+/// Important: The iOS SDK never plays voice automatically. If this
+/// closure is <code>nil</code>, only the first clip (via <code>onBitmap</code>) is offered —
+/// the host app is the only voice player.
+///
+/// </blockquote>
+@property (nonatomic, copy) void (^ _Nullable onVoice)(NSData * _Nonnull, NSInteger, NSInteger);
 /// Create a manager for the authenticated profile.
 /// note:
 /// Throws an Objective-C exception with name
@@ -976,6 +1188,44 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// navigation session and you want to free the engine’s memory. The
 /// next <code>updateLocation</code> call will trigger a fresh fetch.
 - (void)reset;
+/// Objective-C entry point for <code>setMutedAlertTypes(_:)</code>.
+/// <code>Set<VoiceAlertType></code> is not representable in Objective-C, so ObjC
+/// hosts pass the raw <code>VoiceAlertType</code> values boxed in <code>NSNumber</code>:
+/// \code
+/// [manager setMutedAlertTypeValues:@[@(VoiceAlertTypeSpeedCamera),
+///                                    @(VoiceAlertTypeToll)]];
+///
+/// \endcodeSemantics are identical to <code>setMutedAlertTypes(_:)</code> — see it for the
+/// mute rules. Values matching no <code>VoiceAlertType</code> case are ignored rather
+/// than raising, so a host built against a newer enum degrades quietly.
+/// \param rawValues categories to suppress; empty re-enables all.
+///
+- (void)setMutedAlertTypeValues:(NSArray<NSNumber *> * _Nonnull)rawValues;
+/// Begin appending native logs to <code>path</code>. Pass <code>nil</code> to disable file
+/// logging. Useful for field tests where the Xcode console is
+/// unavailable; pair with <code>flushLog()</code> before sharing the file.
+/// <blockquote>
+/// Important: <em>Debug builds only.</em> The XCFramework published to
+/// integrators is built in Release configuration, which compiles
+/// every native log call site out of the binary — there is
+/// nothing for the file sink to capture. In a release build this
+/// method is a no-op that returns <code>false</code> without creating any
+/// file, so callers can detect the disabled-in-production state
+/// instead of finding an empty file on disk and assuming the SDK
+/// is broken.
+///
+/// </blockquote>
+///
+/// returns:
+/// <code>true</code> when the file was successfully opened for
+/// appending. Always <code>false</code> on release builds.
+- (BOOL)setLogFilePath:(NSString * _Nullable)path;
+/// Current native log file path, or empty string when file logging
+/// is off (including all release builds — see <code>setLogFilePath</code>).
+@property (nonatomic, readonly, copy) NSString * _Nonnull logFilePath;
+/// Flush pending bytes to disk before sharing the log file. No-op
+/// on release builds (see <code>setLogFilePath</code>).
+- (void)flushLog;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end

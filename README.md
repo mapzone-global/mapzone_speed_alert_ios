@@ -4,21 +4,6 @@ This SDK is provided only for Vietmap MAPs API enterprise customers. Contact you
 
 ---
 
-## Requirements
-
-| | Minimum |
-|---|---|
-| iOS deployment target | 12.0 |
-| Xcode | 14.0 |
-| Swift | 5.0 |
-| Device | iPhone 6s or newer (arm64) |
-| Network | HTTPS access to `*.map.zone` |
-| Location | GPS hardware required (Wi-Fi-only iPads not supported) |
-
-> **Note:** The XCFramework ships `arm64` slices for device and `arm64`+`x86_64` for simulator. Apple Silicon Macs run the simulator slice natively.
-
----
-
 ## Installation
 
 ### CocoaPods (recommended)
@@ -248,48 +233,6 @@ Pass the integer `value` column to the `vehicleType:` initialiser argument.
 
 ---
 
-## Voice Cues & Priority
-
-The engine can emit several voice cues on a single GPS tick (e.g. a "speeding" warning plus an upcoming camera). Each clip delivered to `onVoice(wav, trigger, priority)` carries two integers. The engine orders the clips by **priority descending**, and within the same priority by **travel order** (nearest alert first). Because the iOS SDK never plays audio itself, the host decides whether to play / queue / skip — e.g. favour `2` (speeding) and drop `0` ("current") when the playback queue is congested.
-
-### `priority`
-
-| `priority` | Tier | Behaviour |
-|---|---|---|
-| `2` | Speeding | Most urgent — *"bạn đang vượt quá giới hạn tốc độ"* (you are exceeding the speed limit). |
-| `1` | Normal | Approaching speed limit, cameras, tolls, signs (travel order). |
-| `0` | Current | *"tốc độ giới hạn hiện tại …"* (current speed limit …) — stale-prone; drop first under congestion. |
-
-### `trigger`
-
-Identifies which cue fired, so the host can filter or substitute its own audio. Spoken phrases are Vietnamese.
-
-| `trigger` | Name | Spoken phrase |
-|---|---|---|
-| `0` | None | — |
-| `1` | Current speed limit | "tốc độ giới hạn hiện tại X km/h" |
-| `2` | Approaching speed limit | "tốc độ giới hạn tiếp theo X km/h" |
-| `3` | Camera | "phía trước có camera theo dõi tốc độ" |
-| `4` | Toll booth | "phía trước có trạm thu phí" |
-| `5` | Speeding | "bạn đang vượt quá giới hạn tốc độ" |
-| `6` | Enforcement camera | "phía trước có camera phạt nguội" |
-| `7` | Red-light camera | "phía trước có camera giám sát" |
-| `8` | AI camera | "phía trước có camera giám sát" |
-| `9` | No left turn | "phía trước có biển báo cấm rẽ trái" |
-| `10` | No right turn | "phía trước có biển báo cấm rẽ phải" |
-| `11` | No U-turn | "phía trước có biển báo cấm quay đầu" |
-| `12` | No overtaking | "phía trước có biển báo cấm vượt" |
-| `13` | No-overtaking end | "kết thúc đoạn cấm vượt" |
-| `14` | No parking | "phía trước có biển báo cấm đỗ xe" |
-| `15` | No straight | "phía trước có biển báo cấm đi thẳng" |
-| `16` | Built-up area start | "phía trước có biển báo khu dân cư" |
-| `17` | Built-up area end | "phía trước có biển báo kết thúc khu dân cư" |
-| `18` | Rest station | "phía trước có trạm dừng nghỉ" |
-
-> **Note:** AI cameras (`trigger 8`) share the *"camera giám sát"* phrase with red-light cameras (`trigger 7`) — they remain distinct triggers but use the same audio clip.
-
----
-
 ## Error Codes (`onResult`)
 
 | Code | Meaning |
@@ -330,7 +273,3 @@ All public methods are safe to call from the main thread. The callbacks always a
 
 ## Demo
 Check demo app on [Github](https://github.com/mapzone-global/mapzone-speed-alert-app-ios).
-
-## License
-
-Proprietary — MapZone Global. See `LICENSE` for terms.

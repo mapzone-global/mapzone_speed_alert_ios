@@ -197,10 +197,14 @@ NS_ASSUME_NONNULL_BEGIN
  * Add an alert associated with a link.
  * Must be called before buildIndex.
  *
- * @param alertType    0=speed sign, 1=toll, 2=camera
+ * v4 category scheme (category = alertType<<12 | variant):
+ * @param alertType    1=Sign, 2=Camera, 3=TrafficLight (reserved), 4=Toll
+ * @param type         the variant (category & 0xFFF), e.g. 0x001=SpeedLimit
+ *                     for Sign, 0x001=SpeedCamera for Camera. Passed to the
+ *                     engine verbatim as the alert variant.
  * @param isRightOrient YES = POS direction (from→to), NO = NEG
  * @param distance     Meters from fromNode along link geometry
- * @param speed        Speed value in km/h (for speed signs)
+ * @param speed        Speed value in km/h (only for Sign + SpeedLimit variant)
  */
 - (void)addAlertWithId:(NSInteger)alertId
                alertType:(NSInteger)alertType
@@ -227,6 +231,21 @@ NS_ASSUME_NONNULL_BEGIN
  * Graph data and indices are preserved.
  */
 - (void)resetMatcher;
+
+/**
+ * Set which alert triggers are suppressed. `mask` is a bitmask where bit `i`
+ * (the native `VoiceTrigger` enum value) set means that category is muted;
+ * `0` announces everything (the default).
+ *
+ * Muting a camera or toll category also hides its on-screen icon together
+ * with its voice (both read this same mask). Speed-limit and speeding bits
+ * are force-cleared by the engine, so they can never be muted.
+ *
+ * Persists across zone reloads and `clear` — it is a host preference,
+ * not zone data. See `VoiceAlertType` and
+ * `ZoneNetworkManager.setMutedAlertTypes(_:)` for the Swift-facing API.
+ */
+- (void)setMutedVoiceTriggers:(uint64_t)mask;
 
 // -------------------------------------------------------
 //  Snap / Map-match
