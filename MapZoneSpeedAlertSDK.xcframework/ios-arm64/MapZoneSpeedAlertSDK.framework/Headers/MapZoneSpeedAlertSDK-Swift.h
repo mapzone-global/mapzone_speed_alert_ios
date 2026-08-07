@@ -378,6 +378,9 @@ typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
   VoiceAlertTypeBuildUpAreaStart = 16,
   VoiceAlertTypeBuildUpAreaEnd = 17,
   VoiceAlertTypeRestStation = 18,
+  VoiceAlertTypeNoStopping = 19,
+  VoiceAlertTypeRoadClosed = 20,
+  VoiceAlertTypeVehicleRestricted = 21,
 };
 
 @class UIImage;
@@ -391,11 +394,11 @@ typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
 /// results back to the main thread.
 /// <h3>Usage</h3>
 /// \code
-/// // 1. Create with vehicle credentials and profile.
-/// let manager = ZoneNetworkManager(
+/// // 1. Create, then configure with vehicle credentials and profile.
+/// let manager = ZoneNetworkManager()
+/// manager.configure(
 ///     baseUrl: "https://driving.map.zone",
 ///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
-///     bundleId: Bundle.main.bundleIdentifier ?? "",
 ///     vehicleId: "<vehicleId>",
 ///     vehicleType: 1, seats: 1, weights: 1)
 ///
@@ -404,12 +407,17 @@ typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
 /// manager.onBitmap  = { current, status, next, nextDist,
 ///                       camera, camDist, toll, tollDist, voiceWav in ... }
 /// manager.onResult = { success, code, message in ... }
+/// manager.onAccessRestriction = { bmp, kind, distMeters in ... }
+/// manager.onStopRestriction   = { bmp, kind, distMeters in ... }
+/// manager.onBuildupArea       = { bmp, kind, distMeters in ... }
 ///
 /// // 3. Feed every GPS frame.
 /// manager.updateLocation(lat: lat, lng: lng,
 ///                        speedKmh: speedKmh, bearingDeg: bearing)
 /// manager.processGps(lat: lat, lng: lng, bearing: bearing,
-///                    speedKmh: speedKmh, accuracy: accuracy)
+///                    speedKmh: speedKmh, accuracy: accuracy,
+///                    timestampMs: Int64(location.timestamp
+///                                         .timeIntervalSince1970 * 1000))
 ///
 /// \endcodeAll public methods are safe to call from the main thread. Internally
 /// the manager uses a single serial dispatch queue so calls are
@@ -431,11 +439,15 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///   <li>
 ///     <code>errorCode</code>: <code>0</code> on success. Positive values are server-reported
 ///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
-///     <code>3003</code> vehicle type not supported). Negative values are local
-///     SDK failures (network, parse).
+///     <code>3003</code> vehicle type not supported). Negative values are local SDK
+///     failures: <code>-1</code> response could not be verified, <code>-2</code> data invalid,
+///     <code>-3</code> secure session failed, <code>-4</code> server unreachable, <code>-5</code> the
+///     native bridge failed (rejected configuration, call threw).
 ///   </li>
 ///   <li>
-///     <code>errorMessage</code>: human-readable detail, may be empty on success.
+///     <code>errorMessage</code>: a curated sentence derived from <code>errorCode</code> alone.
+///     The server’s own wording never appears here — localise off the
+///     numeric code if you need anything other than English.
 ///   </li>
 /// </ul>
 @property (nonatomic, copy) void (^ _Nullable onResult)(BOOL, NSInteger, NSString * _Nonnull);
@@ -492,10 +504,66 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///
 /// </blockquote>
 @property (nonatomic, copy) void (^ _Nullable onVoice)(NSData * _Nonnull, NSInteger, NSInteger);
-/// Create a manager for the authenticated profile.
+/// Access restriction to display — đường cấm, cấm loại xe.
+/// Restriction signs are split into three independent groups, because
+/// they answer different questions and genuinely co-occur (a street
+/// inside a built-up area can also ban stopping):
+/// \code
+/// access │ đường cấm, cấm loại xe │ may I drive here at all?
+/// stop   │ cấm dừng, cấm đỗ       │ may I stop here?
+/// bua    │ khu dân cư             │ what speed context is this?
+///
+/// \endcodeEach group has its own closure and deserves its own display slot; one
+/// firing says nothing about the other two.
+/// Delivered on the main thread. Parameters <code>(image, kind, distMeters)</code>:
+/// <ul>
+///   <li>
+///     <code>image</code>: the sign, already decoded like the <code>onBitmap</code> signs.
+///     <code>nil</code> when the slot must be hidden — either because <code>kind</code> is <code>0</code>,
+///     or because that sign has no artwork embedded yet. Never treat <code>nil</code>
+///     as an error.
+///   </li>
+///   <li>
+///     <code>kind</code>: <code>MapZoneRestrictionSign</code> — 0 = none, 3 = đường cấm,
+///     4 = cấm loại xe.
+///   </li>
+///   <li>
+///     <code>distMeters</code>: <code>0</code> means “you are on it now” — hide the distance
+///     label; <code>> 0</code> means the restriction starts that far ahead.
+///   </li>
+/// </ul>
+/// Only fired when this group changes, not on every GPS tick: the same
+/// <code>kind</code> moving less than 10 m is not re-emitted. When the restriction
+/// ends, it fires exactly once with <code>kind = 0</code> and <code>image = nil</code>.
+@property (nonatomic, copy) void (^ _Nullable onAccessRestriction)(UIImage * _Nullable, NSInteger, NSInteger);
+/// Stop restriction to display — cấm dừng, cấm đỗ. See
+/// <code>onAccessRestriction</code> for how the three groups relate and for the
+/// parameter contract.
+/// Only raised while the driver is actually slowing down or stopped.
+/// <code>kind</code>: 0 = none, 1 = cấm đỗ, 2 = cấm dừng.
+@property (nonatomic, copy) void (^ _Nullable onStopRestriction)(UIImage * _Nullable, NSInteger, NSInteger);
+/// Built-up area sign to display — khu dân cư. See <code>onAccessRestriction</code>
+/// for how the three groups relate and for the parameter contract.
+/// Not a prohibition: it tells the driver which speed regime applies. The
+/// artwork is a landscape rectangle, not a circle — size the slot
+/// accordingly. <code>kind</code>: 0 = none, 5 = khu dân cư, 6 = hết khu dân cư.
+@property (nonatomic, copy) void (^ _Nullable onBuildupArea)(UIImage * _Nullable, NSInteger, NSInteger);
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+/// Configure the base URL + auth credentials + vehicle profile.
+/// Call once before the first <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
+/// The host bundle identifier is resolved automatically from
+/// <code>Bundle.main</code> — the integrator does not pass it. It is used verbatim
+/// as the auth bundle id, so it must be whitelisted for <code>apiKeyId</code>
+/// exactly as configured in the app target.
 /// note:
 /// Throws an Objective-C exception with name
 /// <code>"InvalidArgument"</code> if <code>baseUrl</code> does not start with <code>https://</code>.
+/// important:
+/// When the SDK is used from an app extension (widget,
+/// CarPlay scene bundled separately, …), <code>Bundle.main</code> is the
+/// <em>extension’s</em> bundle — not the host app’s — so the extension’s
+/// bundle id must be whitelisted too, or the auth call fails with
+/// error code <code>2003</code>.
 /// \param baseUrl Bare host of the zone API, e.g.
 /// <code>"https://driving.map.zone"</code>. Must start with <code>https://</code>.
 ///
@@ -505,9 +573,6 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// it as a credential: do not log it, embed it in source
 /// control, or expose it in user-facing UI.
 ///
-/// \param bundleId Application bundle ID whitelisted for this key,
-/// typically <code>Bundle.main.bundleIdentifier</code>.
-///
 /// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
 ///
 /// \param vehicleType Vehicle category code (see SDK integration guide).
@@ -516,7 +581,7 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///
 /// \param weights Vehicle gross weight in kg — used to filter applicable alerts.
 ///
-- (nonnull instancetype)initWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey bundleId:(NSString * _Nonnull)bundleId vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights OBJC_DESIGNATED_INITIALIZER;
+- (void)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights;
 /// Notify the engine of a position change without motion context.
 /// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
 /// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should
@@ -561,7 +626,15 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// \param accuracy Horizontal accuracy radius in metres
 /// (<code>CLLocation.horizontalAccuracy</code>).
 ///
-- (void)processGpsWithLat:(double)lat lng:(double)lng bearing:(double)bearing speedKmh:(double)speedKmh accuracy:(double)accuracy;
+/// \param timestampMs Epoch milliseconds of the fix itself —
+/// <code>Int64(location.timestamp.timeIntervalSince1970 * 1000)</code>.
+/// Pass the fix’s own time, never <code>Date()</code>: the engine measures voice
+/// throttling and stop detection against this clock, and the delay
+/// between CoreLocation producing the fix and this call reaching the
+/// engine (queue hop + processing) is exactly what those intervals
+/// must not absorb. Mirrors Android’s <code>Location.getTime()</code>.
+///
+- (void)processGpsWithLat:(double)lat lng:(double)lng bearing:(double)bearing speedKmh:(double)speedKmh accuracy:(double)accuracy timestampMs:(int64_t)timestampMs;
 /// Clear all loaded zone data and reset internal state.
 /// Call this when the vehicle profile changes (e.g. driver swaps
 /// <code>vehicleType</code> / <code>seats</code> / <code>weights</code>) or when the user ends a
@@ -606,8 +679,6 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// Flush pending bytes to disk before sharing the log file. No-op
 /// on release builds (see <code>setLogFilePath</code>).
 - (void)flushLog;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 #endif

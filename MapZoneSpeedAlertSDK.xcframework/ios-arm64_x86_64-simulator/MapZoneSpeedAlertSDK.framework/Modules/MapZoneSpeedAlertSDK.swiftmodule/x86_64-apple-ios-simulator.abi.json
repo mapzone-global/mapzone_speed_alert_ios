@@ -1682,6 +1682,129 @@
             "fixedbinaryorder": 14
           },
           {
+            "kind": "Var",
+            "name": "noStopping",
+            "printedName": "noStopping",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(MapZoneSpeedAlertSDK.VoiceAlertType.Type) -> MapZoneSpeedAlertSDK.VoiceAlertType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VoiceAlertType",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                    "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VoiceAlertType",
+                        "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                        "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType@VoiceAlertTypeNoStopping",
+            "mangledName": "$s20MapZoneSpeedAlertSDK05VoiceD4TypeO10noStoppingyA2CmF",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 15
+          },
+          {
+            "kind": "Var",
+            "name": "roadClosed",
+            "printedName": "roadClosed",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(MapZoneSpeedAlertSDK.VoiceAlertType.Type) -> MapZoneSpeedAlertSDK.VoiceAlertType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VoiceAlertType",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                    "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VoiceAlertType",
+                        "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                        "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType@VoiceAlertTypeRoadClosed",
+            "mangledName": "$s20MapZoneSpeedAlertSDK05VoiceD4TypeO10roadClosedyA2CmF",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 16
+          },
+          {
+            "kind": "Var",
+            "name": "vehicleRestricted",
+            "printedName": "vehicleRestricted",
+            "children": [
+              {
+                "kind": "TypeFunc",
+                "name": "Function",
+                "printedName": "(MapZoneSpeedAlertSDK.VoiceAlertType.Type) -> MapZoneSpeedAlertSDK.VoiceAlertType",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VoiceAlertType",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                    "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Metatype",
+                    "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType.Type",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "VoiceAlertType",
+                        "printedName": "MapZoneSpeedAlertSDK.VoiceAlertType",
+                        "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            "declKind": "EnumElement",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@E@VoiceAlertType@VoiceAlertTypeVehicleRestricted",
+            "mangledName": "$s20MapZoneSpeedAlertSDK05VoiceD4TypeO17vehicleRestrictedyA2CmF",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "ObjC"
+            ],
+            "fixedbinaryorder": 17
+          },
+          {
             "kind": "Constructor",
             "name": "init",
             "printedName": "init(rawValue:)",
@@ -2877,21 +3000,746 @@
             ]
           },
           {
+            "kind": "Var",
+            "name": "onAccessRestriction",
+            "printedName": "onAccessRestriction",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "UIKit.UIImage?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UIImage",
+                                "printedName": "UIKit.UIImage",
+                                "usr": "c:objc(cs)UIImage"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(py)onAccessRestriction",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC19onAccessRestrictionySo7UIImageCSg_S2itcSgvp",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)onAccessRestriction",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC19onAccessRestrictionySo7UIImageCSg_S2itcSgvg",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)setOnAccessRestriction:",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC19onAccessRestrictionySo7UIImageCSg_S2itcSgvs",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:20MapZoneSpeedAlertSDK0B14NetworkManagerC19onAccessRestrictionySo7UIImageCSg_S2itcSgvM",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC19onAccessRestrictionySo7UIImageCSg_S2itcSgvM",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "onStopRestriction",
+            "printedName": "onStopRestriction",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "UIKit.UIImage?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UIImage",
+                                "printedName": "UIKit.UIImage",
+                                "usr": "c:objc(cs)UIImage"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(py)onStopRestriction",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC17onStopRestrictionySo7UIImageCSg_S2itcSgvp",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)onStopRestriction",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC17onStopRestrictionySo7UIImageCSg_S2itcSgvg",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)setOnStopRestriction:",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC17onStopRestrictionySo7UIImageCSg_S2itcSgvs",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:20MapZoneSpeedAlertSDK0B14NetworkManagerC17onStopRestrictionySo7UIImageCSg_S2itcSgvM",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC17onStopRestrictionySo7UIImageCSg_S2itcSgvM",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "onBuildupArea",
+            "printedName": "onBuildupArea",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Optional",
+                            "printedName": "UIKit.UIImage?",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "UIImage",
+                                "printedName": "UIKit.UIImage",
+                                "usr": "c:objc(cs)UIImage"
+                              }
+                            ],
+                            "usr": "s:Sq"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(py)onBuildupArea",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC13onBuildupAreaySo7UIImageCSg_S2itcSgvp",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "declAttributes": [
+              "HasInitialValue",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)onBuildupArea",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC13onBuildupAreaySo7UIImageCSg_S2itcSgvg",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Set",
+                "printedName": "Set()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  },
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Optional",
+                    "printedName": "((UIKit.UIImage?, Swift.Int, Swift.Int) -> ())?",
+                    "children": [
+                      {
+                        "kind": "TypeFunc",
+                        "name": "Function",
+                        "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int) -> ()",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Void",
+                            "printedName": "()"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Tuple",
+                            "printedName": "(UIKit.UIImage?, Swift.Int, Swift.Int)",
+                            "children": [
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Optional",
+                                "printedName": "UIKit.UIImage?",
+                                "children": [
+                                  {
+                                    "kind": "TypeNominal",
+                                    "name": "UIImage",
+                                    "printedName": "UIKit.UIImage",
+                                    "usr": "c:objc(cs)UIImage"
+                                  }
+                                ],
+                                "usr": "s:Sq"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              },
+                              {
+                                "kind": "TypeNominal",
+                                "name": "Int",
+                                "printedName": "Swift.Int",
+                                "usr": "s:Si"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    "usr": "s:Sq"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)setOnBuildupArea:",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC13onBuildupAreaySo7UIImageCSg_S2itcSgvs",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "declAttributes": [
+                  "ObjC"
+                ],
+                "accessorKind": "set"
+              },
+              {
+                "kind": "Accessor",
+                "name": "Modify",
+                "printedName": "Modify()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Void",
+                    "printedName": "()"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "s:20MapZoneSpeedAlertSDK0B14NetworkManagerC13onBuildupAreaySo7UIImageCSg_S2itcSgvM",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC13onBuildupAreaySo7UIImageCSg_S2itcSgvM",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "implicit": true,
+                "accessorKind": "_modify"
+              }
+            ]
+          },
+          {
             "kind": "Constructor",
             "name": "init",
-            "printedName": "init(baseUrl:apiKeyId:apiKey:bundleId:vehicleId:vehicleType:seats:weights:)",
+            "printedName": "init()",
             "children": [
               {
                 "kind": "TypeNominal",
                 "name": "ZoneNetworkManager",
                 "printedName": "MapZoneSpeedAlertSDK.ZoneNetworkManager",
                 "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager"
-              },
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)init",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerCACycfc",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "overriding": true,
+            "objc_name": "init",
+            "declAttributes": [
+              "Dynamic",
+              "ObjC",
+              "Override",
+              "AccessControl",
+              "RawDocComment"
+            ],
+            "init_kind": "Designated"
+          },
+          {
+            "kind": "Function",
+            "name": "configure",
+            "printedName": "configure(baseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:)",
+            "children": [
               {
                 "kind": "TypeNominal",
-                "name": "String",
-                "printedName": "Swift.String",
-                "usr": "s:SS"
+                "name": "Void",
+                "printedName": "()"
               },
               {
                 "kind": "TypeNominal",
@@ -2936,17 +3784,17 @@
                 "usr": "s:Si"
               }
             ],
-            "declKind": "Constructor",
-            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)initWithBaseUrl:apiKeyId:apiKey:bundleId:vehicleId:vehicleType:seats:weights:",
-            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC7baseUrl8apiKeyId0jK006bundleL007vehicleL00N4Type5seats7weightsACSS_S4SS3itcfc",
+            "declKind": "Func",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)configureWithBaseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC9configure7baseUrl8apiKeyId0kL007vehicleM00N4Type5seats7weightsySS_S3SS3itF",
             "moduleName": "MapZoneSpeedAlertSDK",
-            "objc_name": "initWithBaseUrl:apiKeyId:apiKey:bundleId:vehicleId:vehicleType:seats:weights:",
+            "objc_name": "configureWithBaseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:",
             "declAttributes": [
               "AccessControl",
               "ObjC",
               "RawDocComment"
             ],
-            "init_kind": "Designated"
+            "funcSelfKind": "NonMutating"
           },
           {
             "kind": "Function",
@@ -3033,7 +3881,7 @@
           {
             "kind": "Function",
             "name": "processGps",
-            "printedName": "processGps(lat:lng:bearing:speedKmh:accuracy:)",
+            "printedName": "processGps(lat:lng:bearing:speedKmh:accuracy:timestampMs:)",
             "children": [
               {
                 "kind": "TypeNominal",
@@ -3069,13 +3917,19 @@
                 "name": "Double",
                 "printedName": "Swift.Double",
                 "usr": "s:Sd"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int64",
+                "printedName": "Swift.Int64",
+                "usr": "s:s5Int64V"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)processGpsWithLat:lng:bearing:speedKmh:accuracy:",
-            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC10processGps3lat3lng7bearing8speedKmh8accuracyySd_S4dtF",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)processGpsWithLat:lng:bearing:speedKmh:accuracy:timestampMs:",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC10processGps3lat3lng7bearing8speedKmh8accuracy11timestampMsySd_S4ds5Int64VtF",
             "moduleName": "MapZoneSpeedAlertSDK",
-            "objc_name": "processGpsWithLat:lng:bearing:speedKmh:accuracy:",
+            "objc_name": "processGpsWithLat:lng:bearing:speedKmh:accuracy:timestampMs:",
             "declAttributes": [
               "AccessControl",
               "ObjC",
@@ -3281,32 +4135,6 @@
               "RawDocComment"
             ],
             "funcSelfKind": "NonMutating"
-          },
-          {
-            "kind": "Constructor",
-            "name": "init",
-            "printedName": "init()",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "ZoneNetworkManager",
-                "printedName": "MapZoneSpeedAlertSDK.ZoneNetworkManager",
-                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager"
-              }
-            ],
-            "declKind": "Constructor",
-            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)init",
-            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerCACycfc",
-            "moduleName": "MapZoneSpeedAlertSDK",
-            "overriding": true,
-            "implicit": true,
-            "objc_name": "init",
-            "declAttributes": [
-              "Dynamic",
-              "ObjC",
-              "Override"
-            ],
-            "init_kind": "Designated"
           }
         ],
         "declKind": "Class",
@@ -3319,6 +4147,7 @@
           "RawDocComment"
         ],
         "superclassUsr": "c:objc(cs)NSObject",
+        "inheritsConvenienceInitializers": true,
         "superclassNames": [
           "ObjectiveC.NSObject"
         ],
@@ -4226,10 +5055,66 @@
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1388,
+      "length": 2,
+      "value": "19"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1413,
+      "length": 2,
+      "value": "20"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1445,
+      "length": 2,
+      "value": "21"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "StringLiteral",
-      "offset": 6459,
+      "offset": 9623,
       "length": 20,
       "value": "\"ZoneNetworkManager\""
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 9868,
+      "length": 1,
+      "value": "1"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "IntegerLiteral",
+      "offset": 15560,
+      "length": 2,
+      "value": "-5"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "StringLiteral",
+      "offset": 15848,
+      "length": 56,
+      "value": "\"The SDK could not complete the request on this device.\""
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 16015,
+      "length": 5,
+      "value": "false"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
+      "kind": "BooleanLiteral",
+      "offset": 16137,
+      "length": 5,
+      "value": "false"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",

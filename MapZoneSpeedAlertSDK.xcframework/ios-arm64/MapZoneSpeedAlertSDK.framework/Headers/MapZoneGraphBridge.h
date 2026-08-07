@@ -6,6 +6,37 @@
 NS_ASSUME_NONNULL_BEGIN
 
 // ============================================================
+//  Link-state restriction signs
+// ============================================================
+
+/**
+ * Which restriction sign the host should be showing right now.
+ *
+ * One slot, not a set: these come from the state of the link the driver is
+ * on (cấm dừng/đỗ, đường cấm, cấm loại xe, khu dân cư), so at any instant
+ * at most one of them is the thing the driver needs to see.
+ *
+ * Values mirror `GraphEngineV2::RestrictionSign` in graph_engine_v2.hpp and
+ * the Android constants — never renumber them.
+ */
+typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
+    /** No restriction sign to show. */
+    MapZoneRestrictionSignNone       = 0,
+    /** Cấm đỗ xe. */
+    MapZoneRestrictionSignNoParking  = 1,
+    /** Cấm dừng xe. */
+    MapZoneRestrictionSignNoStopping = 2,
+    /** Đường cấm (link đang đóng). */
+    MapZoneRestrictionSignRoadClosed = 3,
+    /** Cấm loại xe đang cấu hình. */
+    MapZoneRestrictionSignVehicle    = 4,
+    /** Bắt đầu khu dân cư. */
+    MapZoneRestrictionSignBuaStart   = 5,
+    /** Kết thúc khu dân cư. */
+    MapZoneRestrictionSignBuaEnd     = 6,
+};
+
+// ============================================================
 //  GPS processing result (plain value object, no raw data to caller)
 // ============================================================
 
@@ -22,13 +53,49 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSInteger tollDistMeters;
 /** linkId of the matched road segment (-1 when matched=NO). */
 @property (nonatomic, assign) NSInteger matchedLinkId;
+/**
+ * Raw state of the link under the GPS point — always populated when
+ * matched=YES, independent of what is displayed.
+ *
+ * `currentStopRestriction`: 0 = none, 1 = cấm đỗ, 2 = cấm dừng.
+ */
+@property (nonatomic, assign) NSInteger currentStopRestriction;
+/** YES when this vehicle type is not allowed on the current link. */
+@property (nonatomic, assign) BOOL      currentRestricted;
+/** YES when the current link is closed. */
+@property (nonatomic, assign) BOOL      currentClosed;
+/** YES when the current link is inside a build-up area (khu dân cư). */
+@property (nonatomic, assign) BOOL      currentBua;
+/**
+ * Restriction signs to display right now — see `MapZoneRestrictionSign`.
+ * Already gated by the engine's slow/stopped rule and the lookahead window.
+ *
+ * Three independent groups, because they answer different questions and
+ * genuinely co-occur (a street inside a built-up area can also ban stopping):
+ *
+ *     access │ đường cấm, cấm loại xe │ may I drive here at all?
+ *     stop   │ cấm dừng, cấm đỗ       │ may I stop here?
+ *     bua    │ khu dân cư             │ what speed context is this?
+ *
+ * Any combination may be set on the same tick; each deserves its own display
+ * slot. Within a group the members are mutually exclusive.
+ *
+ * Each `…DistMeters` is `0` when "you are on it now" rather than "unknown";
+ * `> 0` means it starts that far ahead.
+ */
+@property (nonatomic, assign) NSInteger accessRestrictionSign;
+@property (nonatomic, assign) NSInteger accessRestrictionDistMeters;
+@property (nonatomic, assign) NSInteger stopRestrictionSign;
+@property (nonatomic, assign) NSInteger stopRestrictionDistMeters;
+@property (nonatomic, assign) NSInteger buaSign;
+@property (nonatomic, assign) NSInteger buaDistMeters;
 /** Snapped GPS position from the HMM matcher (valid only when snapValid=YES). */
 @property (nonatomic, assign) double    snapLat;
 @property (nonatomic, assign) double    snapLng;
 @property (nonatomic, assign) BOOL      snapValid;
 /**
  * Primary voice trigger this tick (back-compat). See VoiceTrigger enum
- * values 1..18 in graph_engine_v2.hpp. Use `voiceTriggers` for the full
+ * values 1..21 in graph_engine_v2.hpp. Use `voiceTriggers` for the full
  * list when multiple variants fire on the same tick.
  */
 @property (nonatomic, assign) NSInteger voiceTrigger;
@@ -130,22 +197,31 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Outcome of a V3 zone-reload attempt.
  *
- * `errorCode` semantics:
+ * `errorCode` semantics — see `src/v2/engine/zone_error_message.hpp`, which
+ * is the single source of truth shared with Android:
  *
  * | Code   | Meaning                                                            |
  * |--------|--------------------------------------------------------------------|
  * | 0      | Success.                                                           |
+ * | 1001   | Invalid parameter (e.g. coordinates outside the supported area).   |
  * | 2003   | Unauthorized (expired token, bundleId/vehicle out of scope).       |
- * | 1001   | Invalid parameter.                                                 |
  * | 3003   | Vehicle type not supported.                                        |
- * | < 0    | Local SDK failure (network, processing, parse).                    |
+ * | -1     | Response could not be verified.                                    |
+ * | -2     | Payload empty, malformed, or unusable.                             |
+ * | -3     | Secure session could not be established.                           |
+ * | -4     | Server unreachable.                                                |
+ * | -5     | Native bridge layer failed (configuration rejected, call threw).   |
  */
 @interface ZoneLoadResult : NSObject
 /** YES when fresh zone data was loaded into the engine. */
 @property (nonatomic, assign) BOOL       success;
 /** See ZoneLoadResult docs for the code table. */
 @property (nonatomic, assign) NSInteger  errorCode;
-/** Human-readable detail, may be empty on success. */
+/**
+ * Curated, host-facing message derived from `errorCode` alone. The server's
+ * own wording and the SDK's internal stage names are never forwarded here —
+ * they go to the engine log only. Empty on success.
+ */
 @property (nonatomic, copy)   NSString  *errorMessage;
 @end
 
@@ -251,54 +327,6 @@ NS_ASSUME_NONNULL_BEGIN
 //  Snap / Map-match
 // -------------------------------------------------------
 
-/**
- * Online map-matching: feed one GPS point at a time.
- *
- * @param lat       Latitude (degrees)
- * @param lng       Longitude (degrees)
- * @param bearing   Device heading 0-360°, clockwise from north
- * @param speed     Speed in m/s
- * @param accuracy  Horizontal accuracy in meters
- * @param timestamp Timestamp in milliseconds
- * @return MapZoneSnapResult — check matched before using other fields
- */
-- (MapZoneSnapResult *)snapOnlineWithLat:(double)lat
-                                         lng:(double)lng
-                                     bearing:(double)bearing
-                                       speed:(double)speed
-                                    accuracy:(double)accuracy
-                                   timestamp:(int64_t)timestamp;
-
-// -------------------------------------------------------
-//  Alert lookup
-// -------------------------------------------------------
-
-/**
- * Find upcoming alerts ahead of the current matched position.
- *
- * @param linkIdx   linkIdx from MapZoneSnapResult
- * @param dir       @"pos" or @"neg"
- * @param distAlong distAlong from MapZoneSnapResult
- * @param gpsLat    Current GPS latitude
- * @param gpsLng    Current GPS longitude
- * @param maxLinks  How many links ahead to scan (suggested: 5)
- * @return Array of MapZoneNextAlert, sorted by distanceAhead ascending
- */
-- (NSArray<MapZoneNextAlert *> *)findNextAlertsWithLinkIdx:(NSInteger)linkIdx
-                                                           dir:(NSString *)dir
-                                                     distAlong:(double)distAlong
-                                                        gpsLat:(double)gpsLat
-                                                        gpsLng:(double)gpsLng
-                                                      maxLinks:(NSInteger)maxLinks;
-
-/**
- * Get current speed limit at matched position.
- * Returns speed in km/h, or 0 if unavailable.
- */
-- (NSInteger)getCurrentSpeedWithLinkIdx:(NSInteger)linkIdx
-                                      dir:(NSString *)dir
-                                distAlong:(double)distAlong;
-
 // -------------------------------------------------------
 //  Diagnostics
 // -------------------------------------------------------
@@ -344,6 +372,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Generate the standard toll-sign BMP. */
 - (NSData *)generateTollBmp;
+
+/**
+ * Generate the BMP for a link-state restriction sign.
+ *
+ * @param kind        one of `MapZoneRestrictionSign`.
+ * @param vehicleType Vehicle category code, only consulted for
+ *                    `MapZoneRestrictionSignVehicle` (which "cấm xe" artwork
+ *                    matches the configured vehicle).
+ * @return nil when the sign has no artwork embedded yet — the host must
+ *         degrade to hiding the slot, not treat it as an error.
+ */
+- (nullable NSData *)generateRestrictionBmp:(NSInteger)kind
+                                vehicleType:(NSInteger)vehicleType;
 
 /**
  * Compute speed status.
@@ -409,6 +450,17 @@ NS_ASSUME_NONNULL_BEGIN
 /** Build-up area end (sign 0x1003) — "kết thúc khu dân cư". */
 - (NSData *)generateBuildUpAreaEndVoice;
 
+// ── Link-state restriction voice clips ─────────────────────────────────
+// These return nil while no clip is recorded yet — callers must skip the
+// announcement instead of playing an empty buffer.
+
+/** Cấm dừng (trigger 19) — "phía trước có biển báo cấm dừng đỗ". */
+- (nullable NSData *)generateNoStoppingVoice;
+/** Đường cấm (trigger 20) — chưa có clip, hiện trả nil. */
+- (nullable NSData *)generateRoadClosedVoice;
+/** Cấm loại xe (trigger 21) — chưa có clip, hiện trả nil. */
+- (nullable NSData *)generateVehicleRestrictedVoice;
+
 // -------------------------------------------------------
 //  Zone loading — C++ owns HTTP + decode + parse
 // -------------------------------------------------------
@@ -458,10 +510,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @param seats      Number of seats.
  * @param weights    Vehicle gross weight in kg.
  *
- * Throws an NSException with name `"InvalidArgument"` if `baseUrl`
- * does not start with `https://`.
+ * @return YES when the configuration was accepted. NO when it was rejected
+ *         (e.g. `baseUrl` does not start with `https://`); the caller should
+ *         report it to the host as code -5. This deliberately does NOT throw:
+ *         Swift cannot catch an NSException, so throwing turned a
+ *         configuration mistake into a crash of the host app.
  */
-- (void)configureZoneWithBaseUrl:(NSString *)baseUrl
+- (BOOL)configureZoneWithBaseUrl:(NSString *)baseUrl
                           apiKeyId:(NSString *)apiKeyId
                             apiKey:(NSString *)apiKey
                           bundleId:(NSString *)bundleId
@@ -551,27 +606,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)resetMatcherV2
     __attribute__((deprecated("Renamed: use -resetMatcher")));
-
-- (MapZoneSnapResult *)snapOnlineV2WithLat:(double)lat
-                                       lng:(double)lng
-                                   bearing:(double)bearing
-                                     speed:(double)speed
-                                  accuracy:(double)accuracy
-                                 timestamp:(int64_t)timestamp
-    __attribute__((deprecated("Renamed: use -snapOnlineWithLat:lng:bearing:speed:accuracy:timestamp:")));
-
-- (NSArray<MapZoneNextAlert *> *)findNextAlertsV2WithLinkIdx:(NSInteger)linkIdx
-                                                         dir:(NSString *)dir
-                                                   distAlong:(double)distAlong
-                                                      gpsLat:(double)gpsLat
-                                                      gpsLng:(double)gpsLng
-                                                    maxLinks:(NSInteger)maxLinks
-    __attribute__((deprecated("Renamed: use -findNextAlertsWithLinkIdx:dir:distAlong:gpsLat:gpsLng:maxLinks:")));
-
-- (NSInteger)getCurrentSpeedV2WithLinkIdx:(NSInteger)linkIdx
-                                      dir:(NSString *)dir
-                                distAlong:(double)distAlong
-    __attribute__((deprecated("Renamed: use -getCurrentSpeedWithLinkIdx:dir:distAlong:")));
 
 - (NSData *)generateCameraVoiceV2
     __attribute__((deprecated("Renamed: use -generateCameraVoice")));

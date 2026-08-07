@@ -55,6 +55,9 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   case buildUpAreaStart = 16
   case buildUpAreaEnd = 17
   case restStation = 18
+  case noStopping = 19
+  case roadClosed = 20
+  case vehicleRestricted = 21
   #if compiler(>=5.3) && $NonescapableTypes
   public init?(rawValue: Swift.Int)
   #endif
@@ -63,15 +66,19 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
     get
   }
 }
-@objc public class ZoneNetworkManager : ObjectiveC.NSObject {
+@_inheritsConvenienceInitializers @objc public class ZoneNetworkManager : ObjectiveC.NSObject {
   @objc public var onReady: ((Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public var onResult: ((Swift.Bool, Swift.Int, Swift.String) -> Swift.Void)?
   @objc public var onBitmap: ((UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, UIKit.UIImage?, Swift.Int, Foundation.Data?) -> Swift.Void)?
   @objc public var onVoice: ((Foundation.Data, Swift.Int, Swift.Int) -> Swift.Void)?
-  @objc public init(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, bundleId: Swift.String, vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Int)
+  @objc public var onAccessRestriction: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
+  @objc public var onStopRestriction: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
+  @objc public var onBuildupArea: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
+  @objc override dynamic public init()
+  @objc public func configure(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Int)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double, speedKmh: Swift.Double, bearingDeg: Swift.Double)
-  @objc public func processGps(lat: Swift.Double, lng: Swift.Double, bearing: Swift.Double, speedKmh: Swift.Double, accuracy: Swift.Double)
+  @objc public func processGps(lat: Swift.Double, lng: Swift.Double, bearing: Swift.Double, speedKmh: Swift.Double, accuracy: Swift.Double, timestampMs: Swift.Int64)
   @objc public func reset()
   public func setMutedAlertTypes(_ types: Swift.Set<MapZoneSpeedAlertSDK.VoiceAlertType>)
   @objc(setMutedAlertTypeValues:) public func setMutedAlertTypeValues(_ rawValues: [Foundation.NSNumber])
