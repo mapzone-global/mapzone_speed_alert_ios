@@ -36,6 +36,31 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
     MapZoneRestrictionSignBuaEnd     = 6,
 };
 
+/**
+ * Which camera artwork the host should be showing right now.
+ *
+ * One slot, like the restriction sign: the engine picks the nearest camera
+ * ahead that is not muted and reports its kind here, so the icon says which
+ * camera is coming rather than only that one is. A camera variant the SDK has
+ * no artwork for is not shown at all — it reports None with a 0 distance,
+ * matching the voice side, which is also silent for those variants.
+ *
+ * Values mirror `GraphEngineV2::CameraSign` in graph_engine_v2.hpp and the
+ * Android constants — never renumber them.
+ */
+typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
+    /** No camera to show. */
+    MapZoneCameraSignNone        = 0,
+    /** Camera theo dõi tốc độ. */
+    MapZoneCameraSignSpeed       = 1,
+    /** Camera phạt nguội. */
+    MapZoneCameraSignEnforcement = 2,
+    /** Camera đèn giao thông. */
+    MapZoneCameraSignRedLight    = 3,
+    /** Camera AI. */
+    MapZoneCameraSignAI          = 4,
+};
+
 // ============================================================
 //  GPS processing result (plain value object, no raw data to caller)
 // ============================================================
@@ -50,6 +75,11 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
 @property (nonatomic, assign) NSInteger nextSpeedLimit;
 @property (nonatomic, assign) NSInteger nextDistMeters;
 @property (nonatomic, assign) NSInteger cameraDistMeters;
+/**
+ * Which camera artwork goes with `cameraDistMeters` — see `MapZoneCameraSign`.
+ * Moves in lockstep with it: both are 0 when there is no camera ahead.
+ */
+@property (nonatomic, assign) MapZoneCameraSign cameraSign;
 @property (nonatomic, assign) NSInteger tollDistMeters;
 /** linkId of the matched road segment (-1 when matched=NO). */
 @property (nonatomic, assign) NSInteger matchedLinkId;
@@ -116,6 +146,15 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
  * The engine already ordered the events (priority desc, then nearest first).
  */
 @property (nonatomic, copy) NSArray<NSNumber *> *voicePriorities;
+/**
+ * Distance in metres for each entry in `voiceTriggers` (same index/order), as
+ * `NSInteger` in `NSNumber`. `0` means "you are on it now", not "unknown".
+ *
+ * Needed because some clips are worded for where the thing is: the cấm
+ * dừng/cấm đỗ announcements say "vị trí hiện tại …" at 0 and "phía trước …"
+ * further out. Pass it to -generateNoParkingVoice: / -generateNoStoppingVoice:.
+ */
+@property (nonatomic, copy) NSArray<NSNumber *> *voiceDistances;
 @end
 
 // ============================================================
@@ -367,7 +406,22 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
  */
 - (nullable NSData *)generateSpeedSignBmp:(NSInteger)speedKmh;
 
-/** Generate the standard camera-sign BMP. */
+/**
+ * Generate the BMP for one camera variant.
+ *
+ * @param sign one of `MapZoneCameraSign`, normally straight from
+ *             `MapZoneGpsProcessResult.cameraSign`.
+ * @return nil for `MapZoneCameraSignNone` and for a variant whose artwork is
+ *         not embedded yet — the host hides the slot either way.
+ */
+- (nullable NSData *)generateCameraBmp:(MapZoneCameraSign)sign;
+
+/**
+ * Generate the generic camera-sign BMP (camera phạt nguội artwork).
+ *
+ * Kept for callers written before the variants existed. New code has a variant
+ * to hand: use -generateCameraBmp: so the icon matches the camera.
+ */
 - (NSData *)generateCameraBmp;
 
 /** Generate the standard toll-sign BMP. */
@@ -441,7 +495,23 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
 - (NSData *)generateNoOvertakingVoice;
 /** End of no-overtaking zone (sign 0x1005) — "kết thúc đoạn cấm vượt". */
 - (NSData *)generateNoOvertakingEndVoice;
-/** No parking (sign 0x100D) — "phía trước có biển báo cấm dừng đỗ". */
+/**
+ * No parking (sign 0x100D) — cấm dừng đỗ.
+ *
+ * @param distanceMeters distance to the restriction, straight from
+ *        `MapZoneGpsProcessResult.voiceDistances`. `0` (you are standing on the
+ *        stretch) says "vị trí hiện tại cấm đỗ xe"; anything larger says
+ *        "phía trước có biển báo cấm đỗ xe".
+ */
+- (NSData *)generateNoParkingVoice:(NSInteger)distanceMeters;
+
+/**
+ * No parking, wording fixed at "phía trước có biển báo cấm đỗ xe".
+ *
+ * Kept for callers written before the distance existed. New code should use
+ * -generateNoParkingVoice: so a driver already parked on the stretch is not
+ * told the sign is ahead of them.
+ */
 - (NSData *)generateNoParkingVoice;
 /** No straight ahead (sign 0x100C) — "phía trước có biển báo cấm đi thẳng". */
 - (NSData *)generateNoStraightVoice;
@@ -454,7 +524,13 @@ typedef NS_ENUM(NSInteger, MapZoneRestrictionSign) {
 // These return nil while no clip is recorded yet — callers must skip the
 // announcement instead of playing an empty buffer.
 
-/** Cấm dừng (trigger 19) — "phía trước có biển báo cấm dừng đỗ". */
+/**
+ * Cấm dừng (trigger 19). Same here/ahead wording split as
+ * -generateNoParkingVoice:, and the same source for `distanceMeters`.
+ */
+- (nullable NSData *)generateNoStoppingVoice:(NSInteger)distanceMeters;
+
+/** Cấm dừng, wording fixed at "phía trước có biển báo cấm dừng đỗ". */
 - (nullable NSData *)generateNoStoppingVoice;
 /** Đường cấm (trigger 20) — chưa có clip, hiện trả nil. */
 - (nullable NSData *)generateRoadClosedVoice;
