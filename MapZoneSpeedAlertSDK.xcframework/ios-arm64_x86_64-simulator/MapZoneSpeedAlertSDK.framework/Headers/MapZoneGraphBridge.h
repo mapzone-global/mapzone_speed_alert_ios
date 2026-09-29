@@ -362,6 +362,22 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  */
 - (void)setMutedVoiceTriggers:(uint64_t)mask;
 
+/**
+ * Select how the engine turns triggers into audio. `profile` is a native
+ * `VoiceProfile` value: `0` = full spoken phrases, `1` = short ding tones
+ * only. Unknown values fall back to `0`.
+ *
+ * Orthogonal to `setMutedVoiceTriggers:` — mute decides which alerts reach
+ * the voice layer, the profile decides what they sound like, and mute is
+ * applied first. Only the audio changes: on-screen signs, pickup distance,
+ * trigger conditions and anti-repeat rules are the same in both profiles.
+ *
+ * Persists across zone reloads and `clear` — it is a host preference, not
+ * zone data. See `VoiceProfile` and
+ * `ZoneNetworkManager.setVoiceProfile(_:)` for the Swift-facing API.
+ */
+- (void)setVoiceProfile:(NSInteger)profile;
+
 // -------------------------------------------------------
 //  Snap / Map-match
 // -------------------------------------------------------
@@ -536,6 +552,16 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
 - (nullable NSData *)generateRoadClosedVoice;
 /** Cấm loại xe (trigger 21) — chưa có clip, hiện trả nil. */
 - (nullable NSData *)generateVehicleRestrictedVoice;
+
+// ── Ding-only profile clips ────────────────────────────────────────────
+// The engine emits triggers 22 / 23 only while the host has selected
+// `VoiceProfile.dingOnly`; in that profile none of the spoken clips above
+// are requested. Neither takes a parameter — a tone announces no number.
+
+/** Ding (trigger 22) — every camera kind plus no-parking / no-stopping. */
+- (NSData *)generateDingVoice;
+/** Ding (trigger 23) — driving over the speed limit. */
+- (NSData *)generateDingOverSpeedVoice;
 
 // -------------------------------------------------------
 //  Zone loading — C++ owns HTTP + decode + parse

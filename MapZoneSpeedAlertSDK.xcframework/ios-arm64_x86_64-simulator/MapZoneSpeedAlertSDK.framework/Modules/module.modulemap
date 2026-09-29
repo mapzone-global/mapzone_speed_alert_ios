@@ -7,5 +7,4 @@ framework module MapZoneSpeedAlertSDK {
 
 module MapZoneSpeedAlertSDK.Swift {
   header "MapZoneSpeedAlertSDK-Swift.h"
-  requires objc
 }
