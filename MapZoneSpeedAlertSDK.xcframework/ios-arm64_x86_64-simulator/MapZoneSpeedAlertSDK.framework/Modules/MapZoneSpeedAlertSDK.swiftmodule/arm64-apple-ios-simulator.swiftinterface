@@ -87,8 +87,9 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   @objc public var onAccessRestriction: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public var onStopRestriction: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public var onBuildupArea: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
+  @objc public var onSnappedLocation: ((Swift.Double, Swift.Double, Swift.Double) -> Swift.Void)?
   @objc override dynamic public init()
-  @objc public func configure(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, vehicleId: Swift.String, vehicleType: Swift.Int, seats: Swift.Int, weights: Swift.Int)
+  @objc public func configure(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, vehicleId: Swift.String, vehicleType: MapZoneSpeedAlertSDK.VehicleType, seats: Swift.Int, weights: Swift.Int)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double, speedKmh: Swift.Double, bearingDeg: Swift.Double)
   @objc public func processGps(lat: Swift.Double, lng: Swift.Double, bearing: Swift.Double, speedKmh: Swift.Double, accuracy: Swift.Double, timestampMs: Swift.Int64)
@@ -107,14 +108,12 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
 }
 @objc public enum VehicleType : Swift.Int {
   case car = 1
-  case motorcycle = 2
-  case truck = 3
+  case taxi = 2
+  case bus = 3
   case coach = 4
-  case bus = 5
-  case taxi = 6
-  case bicycle = 7
-  case pedestrian = 8
-  case emergency = 9
+  case truck = 5
+  case motorcycle = 7
+  case bike = 8
   public static func fromValue(_ value: Swift.Int) -> MapZoneSpeedAlertSDK.VehicleType
   public var description: Swift.String {
     get

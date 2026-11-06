@@ -123,6 +123,9 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
 @property (nonatomic, assign) double    snapLat;
 @property (nonatomic, assign) double    snapLng;
 @property (nonatomic, assign) BOOL      snapValid;
+/** Road bearing at the snapped point in the direction of travel
+ *  (0 = north, clockwise, [0, 360)). Valid only when snapValid=YES. */
+@property (nonatomic, assign) double    snappedBearingDegrees;
 /**
  * Primary voice trigger this tick (back-compat). See VoiceTrigger enum
  * values 1..21 in graph_engine_v2.hpp. Use `voiceTriggers` for the full
@@ -610,7 +613,7 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * @param vehicleId  Vehicle identifier associated with `apiKeyId`.
  * @param vehicleType Vehicle category code.
  * @param seats      Number of seats.
- * @param weights    Vehicle gross weight in kg.
+ * @param weights    Vehicle gross weight in tonnes.
  *
  * @return YES when the configuration was accepted. NO when it was rejected
  *         (e.g. `baseUrl` does not start with `https://`); the caller should

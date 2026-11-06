@@ -399,19 +399,18 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
-/// Vehicle type for MapZone Speed Alert SDK.
-/// Values aligned with Zone Network v4 backend enum
-/// (<code>drivingalert/api/v1/Zone/network?vehicleType=...</code>).
+/// Vehicle types accepted by <code>ZoneNetworkManager.configure</code>.
+/// Each raw value is the server’s own vehicle code and is sent to it
+/// unchanged. Codes 6 (trailer) and 9 (pedestrian) exist on the server but the
+/// SDK does not offer them.
 typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeCar = 1,
-  VehicleTypeMotorcycle = 2,
-  VehicleTypeTruck = 3,
+  VehicleTypeTaxi = 2,
+  VehicleTypeBus = 3,
   VehicleTypeCoach = 4,
-  VehicleTypeBus = 5,
-  VehicleTypeTaxi = 6,
-  VehicleTypeBicycle = 7,
-  VehicleTypePedestrian = 8,
-  VehicleTypeEmergency = 9,
+  VehicleTypeTruck = 5,
+  VehicleTypeMotorcycle = 7,
+  VehicleTypeBike = 8,
 };
 
 /// Configurable voice-alert categories the host app can mute.
@@ -425,8 +424,9 @@ typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
 /// core safety cues and are always announced — they have no case here, and
 /// their on-screen sign always shows.
 /// Muting a camera or toll category also hides its on-screen icon together
-/// with its voice. The other sign categories (no-turn, no-parking, …)
-/// currently have no icon, so muting them only silences the voice.
+/// with its voice. Muting any other category only silences the voice —
+/// restriction signs (no-parking, road closed, built-up area, …) keep
+/// showing through their own callbacks.
 typedef SWIFT_ENUM(NSInteger, VoiceAlertType, open) {
   VoiceAlertTypeSpeedCamera = 3,
   VoiceAlertTypeToll = 4,
@@ -495,7 +495,7 @@ typedef SWIFT_ENUM(NSInteger, VoiceProfile, open) {
 ///     baseUrl: "https://driving.map.zone",
 ///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
 ///     vehicleId: "<vehicleId>",
-///     vehicleType: 1, seats: 1, weights: 1)
+///     vehicleType: .car, seats: 1, weights: 1)
 ///
 /// // 2. Subscribe to UI events.
 /// manager.onReady   = { links, alerts in ... }
@@ -552,11 +552,11 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// <ul>
 ///   <li>
 ///     <code>currentImage</code>: the active speed-limit sign, or <code>nil</code> when the
-///     matcher has no link under the GPS point.
+///     limit has no sign artwork (only 20…130 in steps of 10 exist).
 ///   </li>
 ///   <li>
 ///     <code>speedStatus</code>: <code>0</code> = within limit, <code>1</code> = approaching limit
-///     (~80–100%), <code>2</code> = exceeding limit. Drive the colour of your
+///     (within 5 km/h), <code>2</code> = exceeding limit. Drive the colour of your
 ///     in-app speedometer from this.
 ///   </li>
 ///   <li>
@@ -593,6 +593,8 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// delivered here and <code>onBitmap</code>’s <code>voiceWav</code> is <code>nil</code> — so there is no
 /// double playback. When it is <code>nil</code>, the first clip falls back to
 /// <code>onBitmap</code>’s <code>voiceWav</code> for legacy hosts.
+/// Fed from the same per-tick pass as <code>onBitmap</code>, so clips arrive here
+/// only while <code>onBitmap</code> is set too (an empty closure is enough).
 /// <blockquote>
 /// Important: When this closure is set it always wins — the host plays
 /// every clip, even with <code>useBuiltInVoicePlayer</code> on (same rule as the
@@ -655,7 +657,8 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// Stop restriction to display — cấm dừng, cấm đỗ. See
 /// <code>onAccessRestriction</code> for how the three groups relate and for the
 /// parameter contract.
-/// Only raised while the driver is actually slowing down or stopped.
+/// The sign is raised at any speed; only its voice waits until the driver
+/// is actually slowing down or stopped.
 /// <code>kind</code>: 0 = none, 1 = cấm đỗ, 2 = cấm dừng.
 @property (nonatomic, copy) void (^ _Nullable onStopRestriction)(UIImage * _Nullable, NSInteger, NSInteger);
 /// Built-up area sign to display — khu dân cư. See <code>onAccessRestriction</code>
@@ -664,6 +667,17 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// artwork is a landscape rectangle, not a circle — size the slot
 /// accordingly. <code>kind</code>: 0 = none, 5 = khu dân cư, 6 = hết khu dân cư.
 @property (nonatomic, copy) void (^ _Nullable onBuildupArea)(UIImage * _Nullable, NSInteger, NSInteger);
+/// GPS fix snapped onto the road the engine is serving — draw the vehicle
+/// marker from it instead of the raw fix.
+/// Parameters: <code>(latitude, longitude, bearingDegrees)</code> — degrees WGS84,
+/// and the road bearing in the direction of travel (0 = north, clockwise,
+/// <code>[0, 360)</code>).
+/// Fired on the main thread once per <code>processGps(lat:lng:bearing:speedKmh:accuracy:timestampMs:)</code>
+/// call that matched a road. Unmatched ticks (zone not loaded, no road
+/// nearby, snap discarded as too far off) are skipped — keep the marker
+/// where it last was. Inside a short coverage hole the engine keeps
+/// serving the last matched road, so the same point can repeat.
+@property (nonatomic, copy) void (^ _Nullable onSnappedLocation)(double, double, double);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 /// Configure the base URL + auth credentials + vehicle profile.
 /// Call once before the first <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
@@ -691,13 +705,14 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///
 /// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
 ///
-/// \param vehicleType Vehicle category code (see SDK integration guide).
+/// \param vehicleType Vehicle type; it decides which alerts apply.
 ///
 /// \param seats Number of seats — used to filter applicable alerts.
 ///
-/// \param weights Vehicle gross weight in kg — used to filter applicable alerts.
+/// \param weights Vehicle gross weight in whole tonnes, sent as given with no
+/// unit conversion. Used to filter applicable alerts.
 ///
-- (void)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(NSInteger)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights;
+- (void)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(enum VehicleType)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights;
 /// Notify the engine of a position change without motion context.
 /// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
 /// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should
