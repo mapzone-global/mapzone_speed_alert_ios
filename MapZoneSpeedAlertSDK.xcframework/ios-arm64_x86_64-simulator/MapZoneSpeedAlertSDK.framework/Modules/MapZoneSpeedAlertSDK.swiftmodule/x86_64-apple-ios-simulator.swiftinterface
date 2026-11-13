@@ -89,7 +89,8 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   @objc public var onBuildupArea: ((UIKit.UIImage?, Swift.Int, Swift.Int) -> Swift.Void)?
   @objc public var onSnappedLocation: ((Swift.Double, Swift.Double, Swift.Double) -> Swift.Void)?
   @objc override dynamic public init()
-  @objc public func configure(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, vehicleId: Swift.String, vehicleType: MapZoneSpeedAlertSDK.VehicleType, seats: Swift.Int, weights: Swift.Int)
+  @objc public func configure(baseUrl: Swift.String, apiKeyId: Swift.String, apiKey: Swift.String, identity: Swift.String, vehicleType: MapZoneSpeedAlertSDK.VehicleType, seats: Swift.Int, weightsTons: Swift.Double, metadata: Swift.String? = nil) -> Swift.String?
+  @objc public func logout(completion: ((Swift.Bool, Swift.Int, Swift.String) -> Swift.Void)? = nil)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double)
   @objc public func updateLocation(lat: Swift.Double, lng: Swift.Double, speedKmh: Swift.Double, bearingDeg: Swift.Double)
   @objc public func processGps(lat: Swift.Double, lng: Swift.Double, bearing: Swift.Double, speedKmh: Swift.Double, accuracy: Swift.Double, timestampMs: Swift.Int64)
@@ -113,8 +114,7 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   case coach = 4
   case truck = 5
   case motorcycle = 7
-  case bike = 8
-  public static func fromValue(_ value: Swift.Int) -> MapZoneSpeedAlertSDK.VehicleType
+  public static func fromValue(_ value: Swift.Int) -> MapZoneSpeedAlertSDK.VehicleType?
   public var description: Swift.String {
     get
   }
@@ -126,6 +126,17 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
   public var rawValue: Swift.Int {
     get
   }
+}
+@_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc final public class MapZoneError : ObjectiveC.NSObject {
+  @objc public static let notLoggedIn: Swift.Int
+  @objc public static let sessionMoved: Swift.Int
+  @objc public static let locked: Swift.Int
+  @objc public static let trialIdentityNotAllowed: Swift.Int
+  @objc public static let newDeviceLimit: Swift.Int
+  @objc public static let requestQuotaExceeded: Swift.Int
+  @objc public static let switchTooSoon: Swift.Int
+  @objc public static let tooManyRequests: Swift.Int
+  @objc deinit
 }
 extension MapZoneSpeedAlertSDK.VoiceAlertType : Swift.Equatable {}
 extension MapZoneSpeedAlertSDK.VoiceAlertType : Swift.Hashable {}

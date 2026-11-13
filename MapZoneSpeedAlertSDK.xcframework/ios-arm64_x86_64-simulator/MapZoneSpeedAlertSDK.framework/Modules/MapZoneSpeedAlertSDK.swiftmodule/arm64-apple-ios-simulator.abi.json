@@ -4264,12 +4264,21 @@
           {
             "kind": "Function",
             "name": "configure",
-            "printedName": "configure(baseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:)",
+            "printedName": "configure(baseUrl:apiKeyId:apiKey:identity:vehicleType:seats:weightsTons:metadata:)",
             "children": [
               {
                 "kind": "TypeNominal",
-                "name": "Void",
-                "printedName": "()"
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "usr": "s:Sq"
               },
               {
                 "kind": "TypeNominal",
@@ -4309,16 +4318,100 @@
               },
               {
                 "kind": "TypeNominal",
-                "name": "Int",
-                "printedName": "Swift.Int",
-                "usr": "s:Si"
+                "name": "Double",
+                "printedName": "Swift.Double",
+                "usr": "s:Sd"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "Swift.String?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "String",
+                    "printedName": "Swift.String",
+                    "usr": "s:SS"
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
               }
             ],
             "declKind": "Func",
-            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)configureWithBaseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:",
-            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC9configure7baseUrl8apiKeyId0kL007vehicleM00N4Type5seats7weightsySS_S3SAA07VehicleO0OS2itF",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)configureWithBaseUrl:apiKeyId:apiKey:identity:vehicleType:seats:weightsTons:metadata:",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC9configure7baseUrl8apiKeyId0kL08identity11vehicleType5seats11weightsTons8metadataSSSgSS_S3SAA07VehicleP0OSiSdAMtF",
             "moduleName": "MapZoneSpeedAlertSDK",
-            "objc_name": "configureWithBaseUrl:apiKeyId:apiKey:vehicleId:vehicleType:seats:weights:",
+            "objc_name": "configureWithBaseUrl:apiKeyId:apiKey:identity:vehicleType:seats:weightsTons:metadata:",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
+            "kind": "Function",
+            "name": "logout",
+            "printedName": "logout(completion:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "((Swift.Bool, Swift.Int, Swift.String) -> ())?",
+                "children": [
+                  {
+                    "kind": "TypeFunc",
+                    "name": "Function",
+                    "printedName": "(Swift.Bool, Swift.Int, Swift.String) -> ()",
+                    "children": [
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Void",
+                        "printedName": "()"
+                      },
+                      {
+                        "kind": "TypeNominal",
+                        "name": "Tuple",
+                        "printedName": "(Swift.Bool, Swift.Int, Swift.String)",
+                        "children": [
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Bool",
+                            "printedName": "Swift.Bool",
+                            "usr": "s:Sb"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "Int",
+                            "printedName": "Swift.Int",
+                            "usr": "s:Si"
+                          },
+                          {
+                            "kind": "TypeNominal",
+                            "name": "String",
+                            "printedName": "Swift.String",
+                            "usr": "s:SS"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "hasDefaultArg": true,
+                "usr": "s:Sq"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)ZoneNetworkManager(im)logoutWithCompletion:",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0B14NetworkManagerC6logout10completionyySb_SiSStcSg_tF",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "objc_name": "logoutWithCompletion:",
             "declAttributes": [
               "AccessControl",
               "ObjC",
@@ -5069,57 +5162,23 @@
             "fixedbinaryorder": 5
           },
           {
-            "kind": "Var",
-            "name": "bike",
-            "printedName": "bike",
-            "children": [
-              {
-                "kind": "TypeFunc",
-                "name": "Function",
-                "printedName": "(MapZoneSpeedAlertSDK.VehicleType.Type) -> MapZoneSpeedAlertSDK.VehicleType",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "VehicleType",
-                    "printedName": "MapZoneSpeedAlertSDK.VehicleType",
-                    "usr": "c:@M@MapZoneSpeedAlertSDK@E@VehicleType"
-                  },
-                  {
-                    "kind": "TypeNominal",
-                    "name": "Metatype",
-                    "printedName": "MapZoneSpeedAlertSDK.VehicleType.Type",
-                    "children": [
-                      {
-                        "kind": "TypeNominal",
-                        "name": "VehicleType",
-                        "printedName": "MapZoneSpeedAlertSDK.VehicleType",
-                        "usr": "c:@M@MapZoneSpeedAlertSDK@E@VehicleType"
-                      }
-                    ]
-                  }
-                ]
-              }
-            ],
-            "declKind": "EnumElement",
-            "usr": "c:@M@MapZoneSpeedAlertSDK@E@VehicleType@VehicleTypeBike",
-            "mangledName": "$s20MapZoneSpeedAlertSDK11VehicleTypeO4bikeyA2CmF",
-            "moduleName": "MapZoneSpeedAlertSDK",
-            "declAttributes": [
-              "RawDocComment",
-              "ObjC"
-            ],
-            "fixedbinaryorder": 6
-          },
-          {
             "kind": "Function",
             "name": "fromValue",
             "printedName": "fromValue(_:)",
             "children": [
               {
                 "kind": "TypeNominal",
-                "name": "VehicleType",
-                "printedName": "MapZoneSpeedAlertSDK.VehicleType",
-                "usr": "c:@M@MapZoneSpeedAlertSDK@E@VehicleType"
+                "name": "Optional",
+                "printedName": "MapZoneSpeedAlertSDK.VehicleType?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "VehicleType",
+                    "printedName": "MapZoneSpeedAlertSDK.VehicleType",
+                    "usr": "c:@M@MapZoneSpeedAlertSDK@E@VehicleType"
+                  }
+                ],
+                "usr": "s:Sq"
               },
               {
                 "kind": "TypeNominal",
@@ -5129,8 +5188,8 @@
               }
             ],
             "declKind": "Func",
-            "usr": "s:20MapZoneSpeedAlertSDK11VehicleTypeO9fromValueyACSiFZ",
-            "mangledName": "$s20MapZoneSpeedAlertSDK11VehicleTypeO9fromValueyACSiFZ",
+            "usr": "s:20MapZoneSpeedAlertSDK11VehicleTypeO9fromValueyACSgSiFZ",
+            "mangledName": "$s20MapZoneSpeedAlertSDK11VehicleTypeO9fromValueyACSgSiFZ",
             "moduleName": "MapZoneSpeedAlertSDK",
             "static": true,
             "declAttributes": [
@@ -5370,6 +5429,536 @@
         "printedName": "Foundation",
         "declKind": "Import",
         "moduleName": "MapZoneSpeedAlertSDK"
+      },
+      {
+        "kind": "Import",
+        "name": "Foundation",
+        "printedName": "Foundation",
+        "declKind": "Import",
+        "moduleName": "MapZoneSpeedAlertSDK",
+        "declAttributes": [
+          "RawDocComment"
+        ]
+      },
+      {
+        "kind": "TypeDecl",
+        "name": "MapZoneError",
+        "printedName": "MapZoneError",
+        "children": [
+          {
+            "kind": "Var",
+            "name": "notLoggedIn",
+            "printedName": "notLoggedIn",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)notLoggedIn",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC11notLoggedInSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)notLoggedIn",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC11notLoggedInSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "sessionMoved",
+            "printedName": "sessionMoved",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)sessionMoved",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC12sessionMovedSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)sessionMoved",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC12sessionMovedSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "locked",
+            "printedName": "locked",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)locked",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC6lockedSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)locked",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC6lockedSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "trialIdentityNotAllowed",
+            "printedName": "trialIdentityNotAllowed",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)trialIdentityNotAllowed",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC23trialIdentityNotAllowedSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)trialIdentityNotAllowed",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC23trialIdentityNotAllowedSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "newDeviceLimit",
+            "printedName": "newDeviceLimit",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)newDeviceLimit",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC14newDeviceLimitSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)newDeviceLimit",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC14newDeviceLimitSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "requestQuotaExceeded",
+            "printedName": "requestQuotaExceeded",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)requestQuotaExceeded",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC20requestQuotaExceededSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)requestQuotaExceeded",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC20requestQuotaExceededSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "switchTooSoon",
+            "printedName": "switchTooSoon",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)switchTooSoon",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC13switchTooSoonSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)switchTooSoon",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC13switchTooSoonSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          },
+          {
+            "kind": "Var",
+            "name": "tooManyRequests",
+            "printedName": "tooManyRequests",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Int",
+                "printedName": "Swift.Int",
+                "usr": "s:Si"
+              }
+            ],
+            "declKind": "Var",
+            "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cpy)tooManyRequests",
+            "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC15tooManyRequestsSivpZ",
+            "moduleName": "MapZoneSpeedAlertSDK",
+            "static": true,
+            "declAttributes": [
+              "HasInitialValue",
+              "Final",
+              "HasStorage",
+              "AccessControl",
+              "ObjC",
+              "RawDocComment"
+            ],
+            "isLet": true,
+            "hasStorage": true,
+            "accessors": [
+              {
+                "kind": "Accessor",
+                "name": "Get",
+                "printedName": "Get()",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "Int",
+                    "printedName": "Swift.Int",
+                    "usr": "s:Si"
+                  }
+                ],
+                "declKind": "Accessor",
+                "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError(cm)tooManyRequests",
+                "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC15tooManyRequestsSivgZ",
+                "moduleName": "MapZoneSpeedAlertSDK",
+                "static": true,
+                "implicit": true,
+                "declAttributes": [
+                  "Final",
+                  "ObjC"
+                ],
+                "accessorKind": "get"
+              }
+            ]
+          }
+        ],
+        "declKind": "Class",
+        "usr": "c:@M@MapZoneSpeedAlertSDK@objc(cs)MapZoneError",
+        "mangledName": "$s20MapZoneSpeedAlertSDK0aB5ErrorC",
+        "moduleName": "MapZoneSpeedAlertSDK",
+        "declAttributes": [
+          "Final",
+          "AccessControl",
+          "ObjC",
+          "RawDocComment"
+        ],
+        "superclassUsr": "c:objc(cs)NSObject",
+        "hasMissingDesignatedInitializers": true,
+        "inheritsConvenienceInitializers": true,
+        "superclassNames": [
+          "ObjectiveC.NSObject"
+        ],
+        "conformances": [
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObserving",
+            "printedName": "_KeyValueCodingAndObserving",
+            "usr": "s:10Foundation27_KeyValueCodingAndObservingP",
+            "mangledName": "$s10Foundation27_KeyValueCodingAndObservingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "_KeyValueCodingAndObservingPublishing",
+            "printedName": "_KeyValueCodingAndObservingPublishing",
+            "usr": "s:10Foundation37_KeyValueCodingAndObservingPublishingP",
+            "mangledName": "$s10Foundation37_KeyValueCodingAndObservingPublishingP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CVarArg",
+            "printedName": "CVarArg",
+            "usr": "s:s7CVarArgP",
+            "mangledName": "$ss7CVarArgP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Copyable",
+            "printedName": "Copyable",
+            "usr": "s:s8CopyableP",
+            "mangledName": "$ss8CopyableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomDebugStringConvertible",
+            "printedName": "CustomDebugStringConvertible",
+            "usr": "s:s28CustomDebugStringConvertibleP",
+            "mangledName": "$ss28CustomDebugStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "CustomStringConvertible",
+            "printedName": "CustomStringConvertible",
+            "usr": "s:s23CustomStringConvertibleP",
+            "mangledName": "$ss23CustomStringConvertibleP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Equatable",
+            "printedName": "Equatable",
+            "usr": "s:SQ",
+            "mangledName": "$sSQ"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Escapable",
+            "printedName": "Escapable",
+            "usr": "s:s9EscapableP",
+            "mangledName": "$ss9EscapableP"
+          },
+          {
+            "kind": "Conformance",
+            "name": "Hashable",
+            "printedName": "Hashable",
+            "usr": "s:SH",
+            "mangledName": "$sSH"
+          }
+        ]
       }
     ],
     "json_format_version": 8
@@ -5609,100 +6198,93 @@
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 10016,
+      "offset": 11469,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "StringLiteral",
-      "offset": 13744,
+      "offset": 15349,
       "length": 20,
       "value": "\"ZoneNetworkManager\""
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 14117,
+      "offset": 16039,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "IntegerLiteral",
-      "offset": 19887,
+      "offset": 25921,
       "length": 2,
       "value": "-5"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "StringLiteral",
-      "offset": 20175,
+      "offset": 26209,
       "length": 56,
       "value": "\"The SDK could not complete the request on this device.\""
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20342,
+      "offset": 26608,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/ZoneNetworkManager.swift",
       "kind": "BooleanLiteral",
-      "offset": 20464,
+      "offset": 26983,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 323,
+      "offset": 443,
       "length": 1,
       "value": "1"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 362,
+      "offset": 482,
       "length": 1,
       "value": "2"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 399,
+      "offset": 519,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 435,
+      "offset": 555,
       "length": 1,
       "value": "4"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 474,
+      "offset": 594,
       "length": 1,
       "value": "5"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
       "kind": "IntegerLiteral",
-      "offset": 512,
+      "offset": 632,
       "length": 1,
       "value": "7"
-    },
-    {
-      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/VehicleType.swift",
-      "kind": "IntegerLiteral",
-      "offset": 549,
-      "length": 1,
-      "value": "8"
     },
     {
       "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/BuiltInVoicePlayer.swift",
@@ -5766,6 +6348,62 @@
       "offset": 2363,
       "length": 5,
       "value": "false"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 814,
+      "length": 2,
+      "value": "-6"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1053,
+      "length": 4,
+      "value": "2006"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1164,
+      "length": 4,
+      "value": "2007"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1302,
+      "length": 4,
+      "value": "2010"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1406,
+      "length": 4,
+      "value": "3012"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1513,
+      "length": 4,
+      "value": "4001"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1755,
+      "length": 4,
+      "value": "2008"
+    },
+    {
+      "filePath": "\/Users\/nguyentoan\/App\/map_sdk\/map-sdk-tracking\/ios\/MapZoneSpeedAlertSDK\/MapZoneError.swift",
+      "kind": "IntegerLiteral",
+      "offset": 1877,
+      "length": 4,
+      "value": "4000"
     }
   ]
 }

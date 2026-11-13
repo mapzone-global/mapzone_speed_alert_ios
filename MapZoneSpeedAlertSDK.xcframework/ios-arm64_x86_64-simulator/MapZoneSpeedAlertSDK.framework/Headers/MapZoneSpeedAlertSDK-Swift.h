@@ -399,10 +399,44 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
+/// Named result codes. The full table, with what the SDK does for each, is on
+/// <code>ZoneNetworkManager.onResult</code>. Branch on the number; the message that comes
+/// with it is a curated English sentence meant for logs and fallback UI.
+SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK12MapZoneError")
+@interface MapZoneError : NSObject
+/// No identity is signed in: logged out, or <code>configure</code> never called.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger notLoggedIn;)
++ (NSInteger)notLoggedIn SWIFT_WARN_UNUSED_RESULT;
+/// The identity is now in use on another device. Send the user to sign in again.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger sessionMoved;)
++ (NSInteger)sessionMoved SWIFT_WARN_UNUSED_RESULT;
+/// This device or identity has been locked by an administrator.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger locked;)
++ (NSInteger)locked SWIFT_WARN_UNUSED_RESULT;
+/// Trial API key: the identity is not one of the key’s sample identities.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger trialIdentityNotAllowed;)
++ (NSInteger)trialIdentityNotAllowed SWIFT_WARN_UNUSED_RESULT;
+/// The API key cannot register more new devices.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger newDeviceLimit;)
++ (NSInteger)newDeviceLimit SWIFT_WARN_UNUSED_RESULT;
+/// The API key has used up its request quota.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger requestQuotaExceeded;)
++ (NSInteger)requestQuotaExceeded SWIFT_WARN_UNUSED_RESULT;
+/// The account on this device changed too recently; the SDK retries after 20 minutes.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger switchTooSoon;)
++ (NSInteger)switchTooSoon SWIFT_WARN_UNUSED_RESULT;
+/// Too many requests; the SDK waits for the server’s Retry-After.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger tooManyRequests;)
++ (NSInteger)tooManyRequests SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 /// Vehicle types accepted by <code>ZoneNetworkManager.configure</code>.
-/// Each raw value is the server’s own vehicle code and is sent to it
-/// unchanged. Codes 6 (trailer) and 9 (pedestrian) exist on the server but the
-/// SDK does not offer them.
+/// Each raw value is the MapZone server’s own vehicle code and is sent to it
+/// unchanged. The server also has 6 (trailer), 8 (bicycle) and 9 (pedestrian);
+/// the SDK does not offer them. The type must also be enabled for the API key,
+/// otherwise login reports <code>1001</code> and zone requests <code>3003</code>.
 typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeCar = 1,
   VehicleTypeTaxi = 2,
@@ -410,7 +444,6 @@ typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeCoach = 4,
   VehicleTypeTruck = 5,
   VehicleTypeMotorcycle = 7,
-  VehicleTypeBike = 8,
 };
 
 /// Configurable voice-alert categories the host app can mute.
@@ -489,13 +522,18 @@ typedef SWIFT_ENUM(NSInteger, VoiceProfile, open) {
 /// results back to the main thread.
 /// <h3>Usage</h3>
 /// \code
-/// // 1. Create, then configure with vehicle credentials and profile.
+/// // 1. Create, then configure with credentials, the signed-in identity and
+/// //    the vehicle profile. Configure also logs the identity in (S1).
 /// let manager = ZoneNetworkManager()
-/// manager.configure(
+/// if let error = manager.configure(
 ///     baseUrl: "https://driving.map.zone",
 ///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
-///     vehicleId: "<vehicleId>",
-///     vehicleType: .car, seats: 1, weights: 1)
+///     identity: "+84901234567",                    // the signed-in user
+///     vehicleType: .truck, seats: 2,
+///     weightsTons: 2.5,                            // tonnes
+///     metadata: #"{"appVersion":"1.4.0"}"#) {      // optional, or nil
+///     // rejected — nothing was applied
+/// }
 ///
 /// // 2. Subscribe to UI events.
 /// manager.onReady   = { links, alerts in ... }
@@ -536,8 +574,35 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
 ///     <code>3003</code> vehicle type not supported). Negative values are local SDK
 ///     failures: <code>-1</code> response could not be verified, <code>-2</code> data invalid,
-///     <code>-3</code> secure session failed, <code>-4</code> server unreachable, <code>-5</code> the
-///     native bridge failed (rejected configuration, call threw).
+///     <code>-3</code> secure session failed (or the device id is not readable yet),
+///     <code>-4</code> server unreachable, <code>-5</code> the native bridge failed (rejected
+///     configuration, call threw), <code>-6</code> no identity signed in.
+///     Also fired when the login sent by <code>configure</code> fails.
+///     The zone already loaded keeps alerting whatever the code; what
+///     changes is whether new zones are fetched (each reported once):
+///     <ul>
+///       <li>
+///         stop until <code>configure</code> is called again: <code>2006</code> (identity in use on
+///         another device — send the user to sign in), <code>2007</code> (locked),
+///         <code>2002</code>/<code>2003</code>/<code>2004</code> (key / signature / bundle id), <code>2005</code> (plan
+///         expired), <code>2010</code> (trial identity), <code>3003</code> (vehicle type),
+///         <code>3011</code>/<code>3012</code> (device limit), <code>4001</code> (quota), <code>1002</code>, and <code>1001</code>
+///         on login (identity or vehicle rejected);
+///       </li>
+///       <li>
+///         stop for 20 minutes, then resume: <code>2008</code> (account switched too
+///         recently);
+///       </li>
+///       <li>
+///         wait for the server’s Retry-After / back off: <code>4000</code>, <code>5000</code>,
+///         <code>5004</code>, <code>2009</code> (on login: reported, retried before a later zone fetch,
+///         at most once a minute);
+///       </li>
+///       <li>
+///         keep going: <code>1001</code> on a zone fetch, <code>2000</code> (device clock off).
+///         See <code>MapZoneError</code> for named constants.
+///       </li>
+///     </ul>
 ///   </li>
 ///   <li>
 ///     <code>errorMessage</code>: a curated sentence derived from <code>errorCode</code> alone.
@@ -679,23 +744,26 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// serving the last matched road, so the same point can repeat.
 @property (nonatomic, copy) void (^ _Nullable onSnappedLocation)(double, double, double);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-/// Configure the base URL + auth credentials + vehicle profile.
-/// Call once before the first <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
+/// Configure the gateway, credentials, the signed-in identity and the
+/// vehicle profile, and log the identity in. Call when the user signs in
+/// or the app starts with a user already signed in, before the first
+/// <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>. Call again to switch
+/// identity or vehicle.
+/// Everything is checked here, on the calling thread; nothing is applied
+/// if any value is rejected. Once applied, the SDK sends the login (S1)
+/// in the background. A login that fails for network / server reasons
+/// does not stop alerts — it is retried before the next zone fetch. A
+/// login the server refuses (account locked, plan expired, account
+/// switched too recently…) stops zone fetches. Both are reported through
+/// <code>onResult</code>; the zone already loaded keeps alerting.
 /// The host bundle identifier is resolved automatically from
 /// <code>Bundle.main</code> — the integrator does not pass it. It is used verbatim
 /// as the auth bundle id, so it must be whitelisted for <code>apiKeyId</code>
 /// exactly as configured in the app target.
-/// note:
-/// Throws an Objective-C exception with name
-/// <code>"InvalidArgument"</code> if <code>baseUrl</code> does not start with <code>https://</code>.
-/// important:
-/// When the SDK is used from an app extension (widget,
-/// CarPlay scene bundled separately, …), <code>Bundle.main</code> is the
-/// <em>extension’s</em> bundle — not the host app’s — so the extension’s
-/// bundle id must be whitelisted too, or the auth call fails with
-/// error code <code>2003</code>.
-/// \param baseUrl Bare host of the zone API, e.g.
-/// <code>"https://driving.map.zone"</code>. Must start with <code>https://</code>.
+/// seealso:
+/// <code>logout(completion:)</code>, <code>MapZoneError</code>.
+/// \param baseUrl Gateway of the API, e.g. <code>"https://driving.map.zone"</code>.
+/// Must start with <code>https://</code>.
 ///
 /// \param apiKeyId Public API Key ID issued for this app.
 ///
@@ -703,16 +771,50 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// it as a credential: do not log it, embed it in source
 /// control, or expose it in user-facing UI.
 ///
-/// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
+/// \param identity The signed-in user or vehicle (e.g. the account’s phone
+/// number <code>"+84901234567"</code>). Sent verbatim and matched exactly —
+/// <code>"0901…"</code> and <code>"+84901…"</code> are two people. Non-empty, at most 128
+/// characters, no <code>"</code> and no control characters.
 ///
-/// \param vehicleType Vehicle type; it decides which alerts apply.
+/// \param vehicleType The vehicle, a <code>VehicleType</code> case. Its raw value is
+/// the server’s vehicle code and is sent unchanged; the type must also
+/// be enabled for the API key (login reports <code>1001</code>, zone requests
+/// <code>3003</code> otherwise).
 ///
-/// \param seats Number of seats — used to filter applicable alerts.
+/// \param seats Number of seats, 0 or more — used to filter applicable alerts.
 ///
-/// \param weights Vehicle gross weight in whole tonnes, sent as given with no
-/// unit conversion. Used to filter applicable alerts.
+/// \param weightsTons Vehicle gross weight in <em>tonnes</em> (e.g. <code>1.5</code>), 0 or
+/// more — used to filter applicable alerts.
 ///
-- (void)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(enum VehicleType)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights;
+/// \param metadata Optional information about this device / user, stored
+/// with the session when it is opened (e.g. app version, internal user
+/// id; agree the key names with Vietmap). The SDK adds <code>"model"</code> and
+/// <code>"os"</code> unless you set them. Must be a single JSON object, at most
+/// 2048 UTF-8 bytes, nesting depth at most 16, strictly RFC 8259.
+/// <code>nil</code> or blank = none.
+///
+///
+/// returns:
+/// <code>nil</code> when the configuration was applied; otherwise a short
+/// English reason why it was rejected — nothing is applied then. A
+/// non-https <code>baseUrl</code> is not returned here: it is reported once through
+/// <code>onResult</code> as code <code>-5</code> on the next update.
+- (NSString * _Nullable)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey identity:(NSString * _Nonnull)identity vehicleType:(enum VehicleType)vehicleType seats:(NSInteger)seats weightsTons:(double)weightsTons metadata:(NSString * _Nullable)metadata SWIFT_WARN_UNUSED_RESULT;
+/// Log the signed-in identity out (S2). Call when the user signs out —
+/// including after the SDK reported <code>2006</code> (account in use on another
+/// device): the server has already closed that session and answers “no
+/// session”, which counts as success.
+/// Zone fetches stop at once, before this method returns, so no request
+/// queued after it can reopen the session. The zone already loaded keeps
+/// alerting; a later zone fetch reports <code>-6</code> until <code>configure</code> signs
+/// someone in again. If the logout request fails (e.g. no network) the
+/// SDK stays logged out locally and keeps the identity: call <code>logout</code>
+/// again to retry.
+/// \param completion Result on the main thread: <code>(true, 0, "")</code>
+/// when logged out — also when nobody was signed in — otherwise
+/// <code>false</code> with the code and message.
+///
+- (void)logoutWithCompletion:(void (^ _Nullable)(BOOL, NSInteger, NSString * _Nonnull))completion;
 /// Notify the engine of a position change without motion context.
 /// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
 /// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should
@@ -1243,10 +1345,44 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK23EnhancedLocationManager")
 - (void)locationManagerDidChangeAuthorization:(CLLocationManager * _Nonnull)manager SWIFT_AVAILABILITY(ios,introduced=14.0);
 @end
 
+/// Named result codes. The full table, with what the SDK does for each, is on
+/// <code>ZoneNetworkManager.onResult</code>. Branch on the number; the message that comes
+/// with it is a curated English sentence meant for logs and fallback UI.
+SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK12MapZoneError")
+@interface MapZoneError : NSObject
+/// No identity is signed in: logged out, or <code>configure</code> never called.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger notLoggedIn;)
++ (NSInteger)notLoggedIn SWIFT_WARN_UNUSED_RESULT;
+/// The identity is now in use on another device. Send the user to sign in again.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger sessionMoved;)
++ (NSInteger)sessionMoved SWIFT_WARN_UNUSED_RESULT;
+/// This device or identity has been locked by an administrator.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger locked;)
++ (NSInteger)locked SWIFT_WARN_UNUSED_RESULT;
+/// Trial API key: the identity is not one of the key’s sample identities.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger trialIdentityNotAllowed;)
++ (NSInteger)trialIdentityNotAllowed SWIFT_WARN_UNUSED_RESULT;
+/// The API key cannot register more new devices.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger newDeviceLimit;)
++ (NSInteger)newDeviceLimit SWIFT_WARN_UNUSED_RESULT;
+/// The API key has used up its request quota.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger requestQuotaExceeded;)
++ (NSInteger)requestQuotaExceeded SWIFT_WARN_UNUSED_RESULT;
+/// The account on this device changed too recently; the SDK retries after 20 minutes.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger switchTooSoon;)
++ (NSInteger)switchTooSoon SWIFT_WARN_UNUSED_RESULT;
+/// Too many requests; the SDK waits for the server’s Retry-After.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger tooManyRequests;)
++ (NSInteger)tooManyRequests SWIFT_WARN_UNUSED_RESULT;
+- (nonnull instancetype)init SWIFT_UNAVAILABLE;
++ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
+@end
+
 /// Vehicle types accepted by <code>ZoneNetworkManager.configure</code>.
-/// Each raw value is the server’s own vehicle code and is sent to it
-/// unchanged. Codes 6 (trailer) and 9 (pedestrian) exist on the server but the
-/// SDK does not offer them.
+/// Each raw value is the MapZone server’s own vehicle code and is sent to it
+/// unchanged. The server also has 6 (trailer), 8 (bicycle) and 9 (pedestrian);
+/// the SDK does not offer them. The type must also be enabled for the API key,
+/// otherwise login reports <code>1001</code> and zone requests <code>3003</code>.
 typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeCar = 1,
   VehicleTypeTaxi = 2,
@@ -1254,7 +1390,6 @@ typedef SWIFT_ENUM(NSInteger, VehicleType, open) {
   VehicleTypeCoach = 4,
   VehicleTypeTruck = 5,
   VehicleTypeMotorcycle = 7,
-  VehicleTypeBike = 8,
 };
 
 /// Configurable voice-alert categories the host app can mute.
@@ -1333,13 +1468,18 @@ typedef SWIFT_ENUM(NSInteger, VoiceProfile, open) {
 /// results back to the main thread.
 /// <h3>Usage</h3>
 /// \code
-/// // 1. Create, then configure with vehicle credentials and profile.
+/// // 1. Create, then configure with credentials, the signed-in identity and
+/// //    the vehicle profile. Configure also logs the identity in (S1).
 /// let manager = ZoneNetworkManager()
-/// manager.configure(
+/// if let error = manager.configure(
 ///     baseUrl: "https://driving.map.zone",
 ///     apiKeyId: "<apiKeyId>", apiKey: "<apiKey>",
-///     vehicleId: "<vehicleId>",
-///     vehicleType: .car, seats: 1, weights: 1)
+///     identity: "+84901234567",                    // the signed-in user
+///     vehicleType: .truck, seats: 2,
+///     weightsTons: 2.5,                            // tonnes
+///     metadata: #"{"appVersion":"1.4.0"}"#) {      // optional, or nil
+///     // rejected — nothing was applied
+/// }
 ///
 /// // 2. Subscribe to UI events.
 /// manager.onReady   = { links, alerts in ... }
@@ -1380,8 +1520,35 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
 ///     <code>3003</code> vehicle type not supported). Negative values are local SDK
 ///     failures: <code>-1</code> response could not be verified, <code>-2</code> data invalid,
-///     <code>-3</code> secure session failed, <code>-4</code> server unreachable, <code>-5</code> the
-///     native bridge failed (rejected configuration, call threw).
+///     <code>-3</code> secure session failed (or the device id is not readable yet),
+///     <code>-4</code> server unreachable, <code>-5</code> the native bridge failed (rejected
+///     configuration, call threw), <code>-6</code> no identity signed in.
+///     Also fired when the login sent by <code>configure</code> fails.
+///     The zone already loaded keeps alerting whatever the code; what
+///     changes is whether new zones are fetched (each reported once):
+///     <ul>
+///       <li>
+///         stop until <code>configure</code> is called again: <code>2006</code> (identity in use on
+///         another device — send the user to sign in), <code>2007</code> (locked),
+///         <code>2002</code>/<code>2003</code>/<code>2004</code> (key / signature / bundle id), <code>2005</code> (plan
+///         expired), <code>2010</code> (trial identity), <code>3003</code> (vehicle type),
+///         <code>3011</code>/<code>3012</code> (device limit), <code>4001</code> (quota), <code>1002</code>, and <code>1001</code>
+///         on login (identity or vehicle rejected);
+///       </li>
+///       <li>
+///         stop for 20 minutes, then resume: <code>2008</code> (account switched too
+///         recently);
+///       </li>
+///       <li>
+///         wait for the server’s Retry-After / back off: <code>4000</code>, <code>5000</code>,
+///         <code>5004</code>, <code>2009</code> (on login: reported, retried before a later zone fetch,
+///         at most once a minute);
+///       </li>
+///       <li>
+///         keep going: <code>1001</code> on a zone fetch, <code>2000</code> (device clock off).
+///         See <code>MapZoneError</code> for named constants.
+///       </li>
+///     </ul>
 ///   </li>
 ///   <li>
 ///     <code>errorMessage</code>: a curated sentence derived from <code>errorCode</code> alone.
@@ -1523,23 +1690,26 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// serving the last matched road, so the same point can repeat.
 @property (nonatomic, copy) void (^ _Nullable onSnappedLocation)(double, double, double);
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-/// Configure the base URL + auth credentials + vehicle profile.
-/// Call once before the first <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>.
+/// Configure the gateway, credentials, the signed-in identity and the
+/// vehicle profile, and log the identity in. Call when the user signs in
+/// or the app starts with a user already signed in, before the first
+/// <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code>. Call again to switch
+/// identity or vehicle.
+/// Everything is checked here, on the calling thread; nothing is applied
+/// if any value is rejected. Once applied, the SDK sends the login (S1)
+/// in the background. A login that fails for network / server reasons
+/// does not stop alerts — it is retried before the next zone fetch. A
+/// login the server refuses (account locked, plan expired, account
+/// switched too recently…) stops zone fetches. Both are reported through
+/// <code>onResult</code>; the zone already loaded keeps alerting.
 /// The host bundle identifier is resolved automatically from
 /// <code>Bundle.main</code> — the integrator does not pass it. It is used verbatim
 /// as the auth bundle id, so it must be whitelisted for <code>apiKeyId</code>
 /// exactly as configured in the app target.
-/// note:
-/// Throws an Objective-C exception with name
-/// <code>"InvalidArgument"</code> if <code>baseUrl</code> does not start with <code>https://</code>.
-/// important:
-/// When the SDK is used from an app extension (widget,
-/// CarPlay scene bundled separately, …), <code>Bundle.main</code> is the
-/// <em>extension’s</em> bundle — not the host app’s — so the extension’s
-/// bundle id must be whitelisted too, or the auth call fails with
-/// error code <code>2003</code>.
-/// \param baseUrl Bare host of the zone API, e.g.
-/// <code>"https://driving.map.zone"</code>. Must start with <code>https://</code>.
+/// seealso:
+/// <code>logout(completion:)</code>, <code>MapZoneError</code>.
+/// \param baseUrl Gateway of the API, e.g. <code>"https://driving.map.zone"</code>.
+/// Must start with <code>https://</code>.
 ///
 /// \param apiKeyId Public API Key ID issued for this app.
 ///
@@ -1547,16 +1717,50 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 /// it as a credential: do not log it, embed it in source
 /// control, or expose it in user-facing UI.
 ///
-/// \param vehicleId Vehicle identifier associated with <code>apiKeyId</code>.
+/// \param identity The signed-in user or vehicle (e.g. the account’s phone
+/// number <code>"+84901234567"</code>). Sent verbatim and matched exactly —
+/// <code>"0901…"</code> and <code>"+84901…"</code> are two people. Non-empty, at most 128
+/// characters, no <code>"</code> and no control characters.
 ///
-/// \param vehicleType Vehicle type; it decides which alerts apply.
+/// \param vehicleType The vehicle, a <code>VehicleType</code> case. Its raw value is
+/// the server’s vehicle code and is sent unchanged; the type must also
+/// be enabled for the API key (login reports <code>1001</code>, zone requests
+/// <code>3003</code> otherwise).
 ///
-/// \param seats Number of seats — used to filter applicable alerts.
+/// \param seats Number of seats, 0 or more — used to filter applicable alerts.
 ///
-/// \param weights Vehicle gross weight in whole tonnes, sent as given with no
-/// unit conversion. Used to filter applicable alerts.
+/// \param weightsTons Vehicle gross weight in <em>tonnes</em> (e.g. <code>1.5</code>), 0 or
+/// more — used to filter applicable alerts.
 ///
-- (void)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey vehicleId:(NSString * _Nonnull)vehicleId vehicleType:(enum VehicleType)vehicleType seats:(NSInteger)seats weights:(NSInteger)weights;
+/// \param metadata Optional information about this device / user, stored
+/// with the session when it is opened (e.g. app version, internal user
+/// id; agree the key names with Vietmap). The SDK adds <code>"model"</code> and
+/// <code>"os"</code> unless you set them. Must be a single JSON object, at most
+/// 2048 UTF-8 bytes, nesting depth at most 16, strictly RFC 8259.
+/// <code>nil</code> or blank = none.
+///
+///
+/// returns:
+/// <code>nil</code> when the configuration was applied; otherwise a short
+/// English reason why it was rejected — nothing is applied then. A
+/// non-https <code>baseUrl</code> is not returned here: it is reported once through
+/// <code>onResult</code> as code <code>-5</code> on the next update.
+- (NSString * _Nullable)configureWithBaseUrl:(NSString * _Nonnull)baseUrl apiKeyId:(NSString * _Nonnull)apiKeyId apiKey:(NSString * _Nonnull)apiKey identity:(NSString * _Nonnull)identity vehicleType:(enum VehicleType)vehicleType seats:(NSInteger)seats weightsTons:(double)weightsTons metadata:(NSString * _Nullable)metadata SWIFT_WARN_UNUSED_RESULT;
+/// Log the signed-in identity out (S2). Call when the user signs out —
+/// including after the SDK reported <code>2006</code> (account in use on another
+/// device): the server has already closed that session and answers “no
+/// session”, which counts as success.
+/// Zone fetches stop at once, before this method returns, so no request
+/// queued after it can reopen the session. The zone already loaded keeps
+/// alerting; a later zone fetch reports <code>-6</code> until <code>configure</code> signs
+/// someone in again. If the logout request fails (e.g. no network) the
+/// SDK stays logged out locally and keeps the identity: call <code>logout</code>
+/// again to retry.
+/// \param completion Result on the main thread: <code>(true, 0, "")</code>
+/// when logged out — also when nobody was signed in — otherwise
+/// <code>false</code> with the code and message.
+///
+- (void)logoutWithCompletion:(void (^ _Nullable)(BOOL, NSInteger, NSString * _Nonnull))completion;
 /// Notify the engine of a position change without motion context.
 /// Equivalent to <code>updateLocation(lat:lng:speedKmh:bearingDeg:)</code> with
 /// <code>speedKmh = 0</code> and <code>bearingDeg = .nan</code>. Most integrations should

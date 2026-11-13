@@ -265,6 +265,18 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * they go to the engine log only. Empty on success.
  */
 @property (nonatomic, copy)   NSString  *errorMessage;
+/**
+ * NO when the host must not hear about this result: a refusal already
+ * reported once, a login that succeeded, nothing to do.
+ */
+@property (nonatomic, assign) BOOL       shouldNotify;
+/**
+ * Non-zero when an S1 login was retried before this zone fetch and failed —
+ * reported to the host ahead of the zone outcome.
+ */
+@property (nonatomic, assign) NSInteger  loginErrorCode;
+/** Host-facing message for `loginErrorCode`; empty when it is 0. */
+@property (nonatomic, copy)   NSString  *loginErrorMessage;
 @end
 
 // ============================================================
@@ -450,7 +462,8 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * Generate the BMP for a link-state restriction sign.
  *
  * @param kind        one of `MapZoneRestrictionSign`.
- * @param vehicleType Vehicle category code, only consulted for
+ * @param vehicleType Server vehicle code as passed to configure
+ *                    (`VehicleType.rawValue`). Only consulted for
  *                    `MapZoneRestrictionSignVehicle` (which "cấm xe" artwork
  *                    matches the configured vehicle).
  * @return nil when the sign has no artwork embedded yet — the host must
@@ -601,22 +614,26 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
 // -------------------------------------------------------
 
 /**
- * Configure the V3 (authenticated) zone profile. Call once before the
- * first `updateLocationWithLat:lng:` call.
+ * Configure the V3 (authenticated) zone profile for one signed-in identity.
+ * Applies at once; the S1 login it owes is sent by `-runPendingLogin`.
  *
- * @param baseUrl    Bare host, e.g. `@"https://driving.map.zone"`.
- *                   Must start with `https://`.
- * @param apiKeyId   Public API Key ID issued for this app.
- * @param apiKey     Authentication secret paired with `apiKeyId`. Treat
- *                   as a credential — do not log.
- * @param bundleId   Application bundle ID whitelisted for this key.
- * @param vehicleId  Vehicle identifier associated with `apiKeyId`.
- * @param vehicleType Vehicle category code.
- * @param seats      Number of seats.
- * @param weights    Vehicle gross weight in tonnes.
+ * @param baseUrl     Gateway, e.g. `@"https://driving.map.zone"`.
+ *                    Must start with `https://`.
+ * @param apiKeyId    Public API Key ID issued for this app.
+ * @param apiKey      Authentication secret paired with `apiKeyId`. Treat
+ *                    as a credential — do not log.
+ * @param bundleId    Application bundle ID whitelisted for this key.
+ * @param identity    The signed-in user / vehicle, sent verbatim.
+ * @param vehicleType Server vehicle code: 1, 2, 3, 4, 5 or 7 (`VehicleType.rawValue`).
+ * @param seats       Number of seats.
+ * @param weightsTons Vehicle gross weight in tonnes.
+ * @param metadata    Optional host metadata (one JSON object), sent as S1
+ *                    `metaData`. nil or blank = none. Check everything first
+ *                    with `+validateConfigurationWithIdentity:…`.
  *
  * @return YES when the configuration was accepted. NO when it was rejected
- *         (e.g. `baseUrl` does not start with `https://`); the caller should
+ *         (`baseUrl` does not start with `https://`, or any input is
+ *         invalid) — nothing is applied in that case; the caller should
  *         report it to the host as code -5. This deliberately does NOT throw:
  *         Swift cannot catch an NSException, so throwing turned a
  *         configuration mistake into a crash of the host app.
@@ -625,10 +642,41 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
                           apiKeyId:(NSString *)apiKeyId
                             apiKey:(NSString *)apiKey
                           bundleId:(NSString *)bundleId
-                         vehicleId:(NSString *)vehicleId
+                          identity:(NSString *)identity
                        vehicleType:(NSInteger)vehicleType
                              seats:(NSInteger)seats
-                           weights:(NSInteger)weights;
+                       weightsTons:(double)weightsTons
+                          metadata:(nullable NSString *)metadata;
+
+/**
+ * Check everything `-configureZoneWithBaseUrl:…` checks, without applying it.
+ * Pure; safe on any thread.
+ *
+ * @return nil when valid, otherwise a short English reason.
+ */
++ (nullable NSString *)validateConfigurationWithIdentity:(nullable NSString *)identity
+                                             vehicleType:(NSInteger)vehicleType
+                                                   seats:(NSInteger)seats
+                                             weightsTons:(double)weightsTons
+                                                metadata:(nullable NSString *)metadata;
+
+/**
+ * Send the S1 login the last configure still owes, if any. Blocks — call on
+ * the SDK queue. `shouldNotify` is NO when there was nothing to send or it
+ * succeeded.
+ */
+- (ZoneLoadResult *)runPendingLogin;
+
+/**
+ * Close the zone gate now and remember who to log out. Call on the host's
+ * thread, before queuing `-runLogout:`.
+ *
+ * @return the logout to run, or 0 when nobody is signed in.
+ */
+- (uint64_t)beginLogout;
+
+/** Send S2 for a logout begun earlier. Blocks — call on the SDK queue. */
+- (ZoneLoadResult *)runLogout:(uint64_t)logoutGeneration;
 
 /**
  * Reload zone data using the V3 profile, without motion context.
