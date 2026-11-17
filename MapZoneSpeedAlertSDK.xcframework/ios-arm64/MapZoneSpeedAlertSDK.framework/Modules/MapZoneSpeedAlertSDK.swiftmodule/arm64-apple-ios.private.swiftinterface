@@ -129,6 +129,7 @@ extension MapZoneSpeedAlertSDK.EnhancedLocationManager : CoreLocation.CLLocation
 }
 @_inheritsConvenienceInitializers @_hasMissingDesignatedInitializers @objc final public class MapZoneError : ObjectiveC.NSObject {
   @objc public static let notLoggedIn: Swift.Int
+  @objc public static let deviceNotReady: Swift.Int
   @objc public static let sessionMoved: Swift.Int
   @objc public static let locked: Swift.Int
   @objc public static let trialIdentityNotAllowed: Swift.Int

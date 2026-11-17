@@ -69,6 +69,9 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * Result of a single full GPS processing pass (snap + alerts).
  * All distances in metres; speeds in km/h. 0 = none/not applicable.
  */
+// Exported explicitly: Release hides symbols by default; this class is part of
+// the public ObjC surface and must stay linkable from host apps.
+__attribute__((visibility("default")))
 @interface MapZoneGpsProcessResult : NSObject
 @property (nonatomic, assign) BOOL     matched;
 @property (nonatomic, assign) NSInteger currentSpeedLimit;
@@ -167,6 +170,7 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
 /**
  * Result of a single online map-match (v2).
  */
+__attribute__((visibility("default")))
 @interface MapZoneSnapResult : NSObject
 
 /** YES if the GPS point was successfully matched to a road. */
@@ -197,6 +201,7 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
 /**
  * A single upcoming alert ahead on the road (v2).
  */
+__attribute__((visibility("default")))
 @interface MapZoneNextAlert : NSObject
 
 /** Alert ID. */
@@ -253,7 +258,10 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * | -3     | Secure session could not be established.                           |
  * | -4     | Server unreachable.                                                |
  * | -5     | Native bridge layer failed (configuration rejected, call threw).   |
+ * | -6     | No identity signed in (logged out, or never configured).           |
+ * | -8     | This device cannot be read yet; retried by the SDK.                |
  */
+__attribute__((visibility("default")))
 @interface ZoneLoadResult : NSObject
 /** YES when fresh zone data was loaded into the engine. */
 @property (nonatomic, assign) BOOL       success;
@@ -302,6 +310,7 @@ typedef NS_ENUM(NSInteger, MapZoneCameraSign) {
  * All public methods are suffixed with `V2`. Thread-safe: the
  * underlying native engine uses a mutex.
  */
+__attribute__((visibility("default")))
 @interface MapZoneGraphBridge : NSObject
 
 + (instancetype)sharedInstance;

@@ -407,6 +407,12 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK12MapZoneError")
 /// No identity is signed in: logged out, or <code>configure</code> never called.
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger notLoggedIn;)
 + (NSInteger)notLoggedIn SWIFT_WARN_UNUSED_RESULT;
+/// This device cannot be read yet (e.g. the phone has not been unlocked since
+/// it restarted), so no zone is fetched. The SDK reads it again by itself
+/// about once a minute; nothing to do but show a notice. Same number in the
+/// Alert View SDK.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger deviceNotReady;)
++ (NSInteger)deviceNotReady SWIFT_WARN_UNUSED_RESULT;
 /// The identity is now in use on another device. Send the user to sign in again.
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger sessionMoved;)
 + (NSInteger)sessionMoved SWIFT_WARN_UNUSED_RESULT;
@@ -574,9 +580,10 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
 ///     <code>3003</code> vehicle type not supported). Negative values are local SDK
 ///     failures: <code>-1</code> response could not be verified, <code>-2</code> data invalid,
-///     <code>-3</code> secure session failed (or the device id is not readable yet),
-///     <code>-4</code> server unreachable, <code>-5</code> the native bridge failed (rejected
-///     configuration, call threw), <code>-6</code> no identity signed in.
+///     <code>-3</code> secure session failed, <code>-4</code> server unreachable, <code>-5</code> the native
+///     bridge failed (rejected configuration, call threw), <code>-6</code> no identity
+///     signed in, <code>-8</code> this device cannot be read yet (the SDK reads it again
+///     about once a minute by itself; reported once).
 ///     Also fired when the login sent by <code>configure</code> fails.
 ///     The zone already loaded keeps alerting whatever the code; what
 ///     changes is whether new zones are fetched (each reported once):
@@ -1353,6 +1360,12 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK12MapZoneError")
 /// No identity is signed in: logged out, or <code>configure</code> never called.
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger notLoggedIn;)
 + (NSInteger)notLoggedIn SWIFT_WARN_UNUSED_RESULT;
+/// This device cannot be read yet (e.g. the phone has not been unlocked since
+/// it restarted), so no zone is fetched. The SDK reads it again by itself
+/// about once a minute; nothing to do but show a notice. Same number in the
+/// Alert View SDK.
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger deviceNotReady;)
++ (NSInteger)deviceNotReady SWIFT_WARN_UNUSED_RESULT;
 /// The identity is now in use on another device. Send the user to sign in again.
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly) NSInteger sessionMoved;)
 + (NSInteger)sessionMoved SWIFT_WARN_UNUSED_RESULT;
@@ -1520,9 +1533,10 @@ SWIFT_CLASS("_TtC20MapZoneSpeedAlertSDK18ZoneNetworkManager")
 ///     errors (e.g. <code>2003</code> unauthorized, <code>1001</code> invalid parameter,
 ///     <code>3003</code> vehicle type not supported). Negative values are local SDK
 ///     failures: <code>-1</code> response could not be verified, <code>-2</code> data invalid,
-///     <code>-3</code> secure session failed (or the device id is not readable yet),
-///     <code>-4</code> server unreachable, <code>-5</code> the native bridge failed (rejected
-///     configuration, call threw), <code>-6</code> no identity signed in.
+///     <code>-3</code> secure session failed, <code>-4</code> server unreachable, <code>-5</code> the native
+///     bridge failed (rejected configuration, call threw), <code>-6</code> no identity
+///     signed in, <code>-8</code> this device cannot be read yet (the SDK reads it again
+///     about once a minute by itself; reported once).
 ///     Also fired when the login sent by <code>configure</code> fails.
 ///     The zone already loaded keeps alerting whatever the code; what
 ///     changes is whether new zones are fetched (each reported once):

@@ -6,6 +6,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+// Exported explicitly: Release hides symbols by default; this class is part of
+// the public ObjC surface and must stay linkable from host apps.
+__attribute__((visibility("default")))
 @interface MapZoneAlertBridge : NSObject
 
 + (instancetype _Nonnull)sharedInstance;
